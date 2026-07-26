@@ -1,1403 +1,2220 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Data Annotator - Map Labeler</title>
-  <style>
-    :root{
-      --bg1:#f5f7fa; --bg2:#e4edf5;
-      --ink:#1f2a37; --muted:#5b6778;
-      --brand1:#1a2980; --brand2:#26d0ce;
-      --accent:#ffd166; --card:#ffffff;
-      --soft:#f7fafc; --line:#e6edf5;
-      --ok:#16a34a; --warn:#b45309; --info:#2563eb;
-      --danger:#dc2626;
-      --discord:#5865F2;
-      --shadow: 0 10px 30px rgba(15, 23, 42, .10);
-      --shadow2: 0 6px 18px rgba(15, 23, 42, .08);
-      --r:14px;
-    }
-    *{box-sizing:border-box;margin:0;padding:0}
-    html{scroll-behavior:smooth}
-    html,body{min-height:100%}
-    body{
-      font-family: 'Segoe UI', ui-sans-serif, system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
-      color:var(--ink);
-      background: linear-gradient(135deg,var(--bg1),var(--bg2));
-      line-height:1.65;
-      display:flex;
-      flex-direction:column;
-    }
-    a{color:inherit;text-decoration:none}
-    a:hover{text-decoration:underline}
-    ul,ol{margin:0;padding:0}
-    img{max-width:100%;display:block}
-    
-    .container{
-      max-width:1200px;
-      margin:0 auto;
-      padding:0 20px;
-      width:100%;
-    }
-    
-    /* ===== HEADER ===== */
-    header{
-      position:sticky;
-      top:0;
-      z-index:100;
-      background: linear-gradient(90deg,var(--brand1),var(--brand2));
-      color:#fff;
-      box-shadow: 0 6px 25px rgba(0,0,0,.15);
-    }
-    .header-inner{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:16px;
-      padding:16px 0;
-      position:relative;
-    }
-    .brand{
-      display:flex;
-      align-items:center;
-      gap:14px;
-      flex-shrink:0;
-    }
-    .logo-icon{
-      width:50px;height:50px;
-      border-radius:14px;
-      background:rgba(255,255,255,.18);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:26px;
-      box-shadow: inset 0 2px 0 rgba(255,255,255,.25);
-    }
-    .brand-text h1{
-      font-size:1.25rem;
-      font-weight:800;
-      line-height:1.2;
-      margin:0;
-    }
-    .brand-text h1 span{color:var(--accent)}
-    .brand-text small{
-      display:block;
-      font-size:.85rem;
-      opacity:.9;
-      font-weight:600;
-      margin-top:2px;
-    }
-    
-    /* Desktop Nav */
-    nav{display:flex;align-items:center}
-    nav ul{
-      list-style:none;
-      display:flex;
-      align-items:center;
-      gap:8px;
-      flex-wrap:wrap;
-    }
-    nav a, nav button{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding:10px 14px;
-      border-radius:10px;
-      font-weight:700;
-      font-size:.95rem;
-      color:#fff;
-      background:transparent;
-      border:none;
-      cursor:pointer;
-      transition: background .2s, transform .1s;
-      white-space:nowrap;
-    }
-    nav a:hover, nav button:hover{
-      background:rgba(255,255,255,.18);
-      text-decoration:none;
-    }
-    nav a:active, nav button:active{transform:translateY(1px)}
-    nav a.active{background:rgba(255,255,255,.22)}
-    .nav-pill{
-      border:1px solid rgba(255,255,255,.3);
-      background:rgba(255,255,255,.1);
-    }
-    .nav-highlight{
-      background:var(--accent);
-      color:var(--ink);
-    }
-    .nav-highlight:hover{background:#ffe08a}
-    
-    /* Dropdown */
-    .dropdown{position:relative}
-    .dropdown-menu{
-      position:absolute;
-      top:calc(100% + 12px);
-      right:0;
-      min-width:280px;
-      background:#fff;
-      color:var(--ink);
-      border-radius:14px;
-      box-shadow: 0 20px 50px rgba(15, 23, 42, .2);
-      border:1px solid var(--line);
-      overflow:hidden;
-      display:none;
-      z-index:200;
-    }
-    .dropdown-menu.open{display:block}
-    .dropdown-header{
-      padding:14px 16px;
-      background:linear-gradient(135deg,#f8fafc,#eef2ff);
-      border-bottom:1px solid var(--line);
-      font-weight:900;
-      color:var(--brand1);
-    }
-    .dropdown-menu a{
-      display:flex;
-      flex-direction:column;
-      padding:14px 16px;
-      border-bottom:1px solid var(--line);
-      font-weight:700;
-      color:var(--ink);
-    }
-    .dropdown-menu a:last-child{border-bottom:none}
-    .dropdown-menu a:hover{background:#f8fafc;text-decoration:none}
-    .dropdown-menu .sub-text{
-      font-size:.88rem;
-      font-weight:600;
-      color:var(--muted);
-      margin-top:3px;
-    }
-    
-    /* Mobile Menu Button */
-    .mobile-btn{
-      display:none;
-      padding:10px 14px;
-      border-radius:12px;
-      border:1px solid rgba(255,255,255,.35);
-      background:rgba(255,255,255,.1);
-      color:#fff;
-      font-weight:900;
-      font-size:1rem;
-      cursor:pointer;
-    }
-    
-    /* Mobile Nav */
-    .mobile-nav{
-      display:none;
-      padding:0 0 16px 0;
-    }
-    .mobile-nav.open{display:block}
-    .mobile-nav-inner{
-      background:rgba(0,0,0,.15);
-      border:1px solid rgba(255,255,255,.2);
-      border-radius:14px;
-      padding:12px;
-      backdrop-filter:blur(10px);
-    }
-    .mobile-nav a, .mobile-nav button{
-      width:100%;
-      justify-content:flex-start;
-      padding:12px 14px;
-      margin-top:8px;
-      border-radius:12px;
-      background:rgba(255,255,255,.1);
-      border:1px solid rgba(255,255,255,.15);
-      text-align:left;
-    }
-    .mobile-nav a:first-child{margin-top:0}
-    .mobile-nav .indent{padding-left:28px;opacity:.92}
-    
-    @media(max-width:1000px){
-      nav{display:none}
-      .mobile-btn{display:flex;align-items:center;gap:8px}
-    }
-    
-    /* ===== MAIN ===== */
-    main{
-      flex:1;
-      padding:24px 0 32px 0;
-    }
-    
-    /* Page transitions */
-    .page{
-      display:none;
-      animation:fadeIn .3s ease;
-    }
-    .page.active{display:block}
-    @keyframes fadeIn{
-      from{opacity:0;transform:translateY(12px)}
-      to{opacity:1;transform:translateY(0)}
-    }
-    
-    /* Hero */
-    .hero{
-      background:var(--card);
-      border-radius:var(--r);
-      box-shadow:var(--shadow);
-      padding:28px;
-      display:grid;
-      grid-template-columns:1.3fr .7fr;
-      gap:24px;
-      align-items:center;
-    }
-    @media(max-width:900px){.hero{grid-template-columns:1fr}}
-    .hero h2{
-      font-size:2.1rem;
-      color:var(--brand1);
-      margin:0 0 12px 0;
-      line-height:1.2;
-    }
-    .hero p{
-      color:var(--muted);
-      margin:0 0 12px 0;
-      font-size:1.05rem;
-    }
-    .hero-actions{
-      display:flex;
-      gap:12px;
-      flex-wrap:wrap;
-      margin-top:16px;
-    }
-    .hero-card{
-      background:linear-gradient(180deg,#f8fafc,#f0fafa);
-      border:1px solid var(--line);
-      border-radius:var(--r);
-      padding:18px;
-    }
-    .hero-card h3{
-      font-size:1.15rem;
-      color:var(--brand1);
-      margin:0 0 10px 0;
-    }
-    .hero-card ul{
-      margin:10px 0 0 20px;
-      color:var(--muted);
-    }
-    .hero-card li{margin-bottom:6px}
-    
-    /* Buttons */
-    .btn{
-      display:inline-flex;
-      align-items:center;
-      gap:10px;
-      padding:12px 20px;
-      border-radius:999px;
-      font-weight:800;
-      font-size:1rem;
-      border:none;
-      cursor:pointer;
-      text-decoration:none;
-      transition: transform .1s, box-shadow .2s, background .2s;
-    }
-    .btn:hover{text-decoration:none}
-    .btn:active{transform:translateY(1px)}
-    .btn-primary{
-      background:linear-gradient(90deg,var(--brand1),var(--brand2));
-      color:#fff;
-      box-shadow: 0 10px 25px rgba(26,41,128,.2);
-    }
-    .btn-primary:hover{box-shadow: 0 14px 30px rgba(26,41,128,.25)}
-    .btn-secondary{
-      background:#fff;
-      color:var(--ink);
-      border:1px solid var(--line);
-    }
-    .btn-secondary:hover{background:#f8fafc}
-    .btn-discord{
-      background:var(--discord);
-      color:#fff;
-      box-shadow: 0 10px 20px rgba(88,101,242,.25);
-    }
-    .btn-discord:hover{background:#4752c4}
-    
-    /* Badges */
-    .badge-row{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top:10px;
-    }
-    .badge{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding:8px 12px;
-      border-radius:999px;
-      background:var(--soft);
-      border:1px solid var(--line);
-      color:var(--muted);
-      font-weight:700;
-      font-size:.9rem;
-    }
-    
-    /* Sections */
-    .section{
-      margin-top:20px;
-      background:var(--card);
-      border-radius:var(--r);
-      box-shadow:var(--shadow2);
-      padding:24px;
-      border:1px solid rgba(230,237,245,.8);
-    }
-    .section h3{
-      font-size:1.4rem;
-      color:var(--brand1);
-      margin:0 0 16px 0;
-      display:flex;
-      align-items:center;
-      gap:12px;
-    }
-    .section-intro{
-      color:var(--muted);
-      margin-bottom:16px;
-    }
-    
-    /* Grid layouts */
-    .grid{display:grid;gap:16px}
-    @media(min-width:768px){
-      .grid-2{grid-template-columns:repeat(2,1fr)}
-      .grid-3{grid-template-columns:repeat(3,1fr)}
-      .grid-4{grid-template-columns:repeat(4,1fr)}
-      .grid-auto{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
-    }
-    
-    /* Cards */
-    .card{
-      background:var(--soft);
-      border:1px solid var(--line);
-      border-left:6px solid var(--brand2);
-      border-radius:12px;
-      padding:16px;
-    }
-    .card h4{
-      font-size:1.1rem;
-      color:var(--ink);
-      margin:0 0 8px 0;
-      display:flex;
-      align-items:center;
-      gap:10px;
-    }
-    .card p{
-      color:var(--muted);
-      margin:0;
-    }
-    .card ul, .card ol{
-      margin:10px 0 0 20px;
-      color:var(--muted);
-    }
-    .card li{margin-bottom:5px}
-    
-    /* KPI Tiles */
-    .kpi-grid{
-      display:grid;
-      gap:12px;
-      grid-template-columns:repeat(2,1fr);
-    }
-    @media(min-width:900px){.kpi-grid{grid-template-columns:repeat(4,1fr)}}
-    .kpi-tile{
-      background:#fff;
-      border:1px solid var(--line);
-      border-radius:14px;
-      padding:16px;
-      box-shadow: 0 8px 20px rgba(15, 23, 42, .06);
-    }
-    .kpi-tile .kpi-title{
-      font-size:1.1rem;
-      font-weight:900;
-      color:var(--brand1);
-      margin-bottom:4px;
-    }
-    .kpi-tile .kpi-desc{
-      font-size:.9rem;
-      color:var(--muted);
-      font-weight:600;
-    }
-    
-    /* Timeline/Steps */
-    .timeline{
-      display:grid;
-      gap:14px;
-    }
-    @media(min-width:900px){.timeline{grid-template-columns:repeat(4,1fr)}}
-    .timeline-step{
-      background:#fff;
-      border:1px solid var(--line);
-      border-radius:14px;
-      padding:16px;
-      position:relative;
-    }
-    .step-number{
-      width:36px;height:36px;
-      border-radius:12px;
-      background:linear-gradient(135deg,var(--brand1),var(--brand2));
-      color:#fff;
-      font-weight:900;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      margin-bottom:12px;
-      font-size:1.1rem;
-    }
-    .timeline-step h4{
-      font-size:1.05rem;
-      color:var(--ink);
-      margin:0 0 6px 0;
-    }
-    .timeline-step p{
-      color:var(--muted);
-      margin:0;
-      font-size:.95rem;
-    }
-    
-    /* Callout boxes */
-    .callout{
-      background:linear-gradient(135deg,#eef2ff,#ecfeff);
-      border:1px solid var(--line);
-      border-left:6px solid var(--info);
-      border-radius:14px;
-      padding:16px;
-      color:var(--muted);
-    }
-    .callout strong{color:var(--ink)}
-    .callout.warning{
-      background:linear-gradient(135deg,#fff7ed,#fffbeb);
-      border-left-color:var(--warn);
-    }
-    .callout.danger{
-      background:linear-gradient(135deg,#fef2f2,#fff5f5);
-      border-left-color:var(--danger);
-    }
-    .callout.success{
-      background:linear-gradient(135deg,#f0fdf4,#ecfdf5);
-      border-left-color:var(--ok);
-    }
-    
-    /* Tables */
-    .table-wrapper{
-      overflow-x:auto;
-      border-radius:14px;
-      border:1px solid var(--line);
-      background:#fff;
-      margin-top:16px;
-    }
-    table{
-      width:100%;
-      border-collapse:collapse;
-      min-width:700px;
-    }
-    th,td{
-      padding:14px 16px;
-      text-align:left;
-      border-bottom:1px solid var(--line);
-    }
-    th{
-      background:linear-gradient(90deg,#55aeb6,#4fb7c8);
-      color:#fff;
-      font-weight:800;
-    }
-    tbody tr:nth-child(even){background:#f5fbfb}
-    tbody tr:hover{background:#ecfeff}
-    
-    /* Video/Link Tags */
-    .tag{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding:10px 14px;
-      border-radius:999px;
-      background:#fff;
-      border:1px solid var(--line);
-      color:var(--muted);
-      font-weight:700;
-      font-size:.95rem;
-    }
-    .tag a{color:var(--info);font-weight:800}
-    .tag a:hover{color:var(--brand1)}
-    
-    /* Apply Page Specifics */
-    .apply-grid{
-      display:grid;
-      gap:16px;
-    }
-    @media(min-width:900px){.apply-grid{grid-template-columns:1.1fr .9fr}}
-    
-    .admin-list{
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-      margin-top:14px;
-    }
-    .admin-badge{
-      display:flex;
-      align-items:center;
-      gap:12px;
-      padding:12px 16px;
-      background:var(--discord);
-      color:#fff;
-      border-radius:12px;
-      font-weight:700;
-      box-shadow:0 4px 10px rgba(88,101,242,.2);
-      transition:transform .1s;
-    }
-    .admin-badge:hover{transform:translateX(5px)}
-    .admin-icon{
-      font-size:1.2rem;
-    }
-    
-    /* Login Form */
-    .form-group{margin-top:14px}
-    .form-group label{
-      display:block;
-      font-weight:800;
-      color:var(--muted);
-      margin-bottom:6px;
-    }
-    .form-group input{
-      width:100%;
-      padding:14px 16px;
-      border-radius:12px;
-      border:1px solid var(--line);
-      font-size:1rem;
-      transition: border-color .2s, box-shadow .2s;
-    }
-    .form-group input:focus{
-      outline:none;
-      border-color:var(--brand2);
-      box-shadow: 0 0 0 4px rgba(38,208,206,.15);
-    }
-    
-    /* ===== FOOTER ===== */
-    footer{
-      margin-top:24px;
-      background:#0b1c55;
-      color:rgba(255,255,255,.92);
-      padding:24px 0;
-    }
-    .footer-inner{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:16px;
-      flex-wrap:wrap;
-    }
-    .footer-brand{
-      font-weight:1000;
-      font-size:1.1rem;
-    }
-    .footer-tagline{
-      opacity:.85;
-      font-weight:600;
-      margin-top:4px;
-    }
-    .footer-copy{
-      opacity:.8;
-      font-weight:700;
-      font-size:.9rem;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>RGC Map Labeler | Data Annotator Application Guide</title>
+
+<meta
+  name="description"
+  content="Learn how to become a Map Labeler and Data Annotator. Check requirements, complete training, download Ginger, pass exams, and apply."
+>
+
+<style>
+:root {
+  --navy: #0b1c55;
+  --blue: #2563eb;
+  --cyan: #06b6d4;
+  --green: #10b981;
+  --yellow: #f59e0b;
+  --red: #ef4444;
+
+  --bg: #f5f7fb;
+  --white: #ffffff;
+  --text: #172033;
+  --muted: #64748b;
+  --border: #e5e7eb;
+  --soft: #f8fafc;
+
+  --shadow-sm: 0 8px 24px rgba(15, 23, 42, .06);
+  --shadow-lg: 0 24px 60px rgba(15, 23, 42, .12);
+
+  --radius: 20px;
+  --max: 1180px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  line-height: 1.6;
+}
+
+a {
+  color: inherit;
+}
+
+.container {
+  width: min(var(--max), calc(100% - 32px));
+  margin: auto;
+}
+
+.skip-link {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  transform: translateY(-150%);
+  background: var(--navy);
+  color: white;
+  padding: 12px 16px;
+  border-radius: 10px;
+  z-index: 9999;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+/* =========================
+   HEADER
+========================= */
+
+header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: rgba(11, 28, 85, .96);
+  backdrop-filter: blur(16px);
+  color: white;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, .15);
+}
+
+.navbar {
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+}
+
+.logo {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--cyan), var(--blue));
+  font-size: 23px;
+}
+
+.brand-title {
+  font-size: 1.05rem;
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+.brand-subtitle {
+  font-size: .78rem;
+  opacity: .75;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.nav-links a {
+  padding: 10px 12px;
+  color: rgba(255,255,255,.9);
+  text-decoration: none;
+  border-radius: 10px;
+  font-weight: 750;
+  font-size: .9rem;
+}
+
+.nav-links a:hover {
+  background: rgba(255,255,255,.12);
+}
+
+.nav-apply {
+  background: var(--green) !important;
+  color: white !important;
+  padding: 11px 17px !important;
+}
+
+.mobile-toggle {
+  display: none;
+  border: 1px solid rgba(255,255,255,.25);
+  background: rgba(255,255,255,.1);
+  color: white;
+  border-radius: 10px;
+  padding: 10px 13px;
+  font-size: 1.1rem;
+}
+
+/* =========================
+   HERO
+========================= */
+
+main {
+  padding: 32px 0 70px;
+}
+
+.hero {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 90% 10%, rgba(6,182,212,.22), transparent 30%),
+    linear-gradient(135deg, #0b1c55, #123b91);
+  color: white;
+  border-radius: 28px;
+  padding: 60px 52px;
+  box-shadow: var(--shadow-lg);
+}
+
+.hero::after {
+  content: "⌁";
+  position: absolute;
+  right: 30px;
+  bottom: -60px;
+  font-size: 260px;
+  opacity: .05;
+  font-weight: 900;
+}
+
+.hero-content {
+  max-width: 760px;
+  position: relative;
+  z-index: 1;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 13px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.18);
+  font-weight: 800;
+  font-size: .85rem;
+  margin-bottom: 18px;
+}
+
+.hero h1 {
+  margin: 0 0 18px;
+  font-size: clamp(2.2rem, 5vw, 4.3rem);
+  line-height: 1.04;
+  letter-spacing: -.04em;
+}
+
+.hero p {
+  margin: 0;
+  max-width: 680px;
+  color: rgba(255,255,255,.82);
+  font-size: 1.08rem;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 13px 19px;
+  border-radius: 12px;
+  text-decoration: none;
+  border: 0;
+  cursor: pointer;
+  font-weight: 850;
+  transition: .2s ease;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+}
+
+.btn-primary {
+  background: var(--green);
+  color: white;
+  box-shadow: 0 12px 25px rgba(16,185,129,.25);
+}
+
+.btn-secondary {
+  background: white;
+  color: var(--navy);
+}
+
+.btn-outline {
+  background: transparent;
+  color: white;
+  border: 1px solid rgba(255,255,255,.35);
+}
+
+.hero-highlights {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 28px;
+}
+
+.highlight {
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.15);
+  font-size: .88rem;
+  font-weight: 750;
+}
+
+/* =========================
+   SECTIONS
+========================= */
+
+.section {
+  margin-top: 28px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 30px;
+  box-shadow: var(--shadow-sm);
+}
+
+.section-header {
+  max-width: 760px;
+  margin-bottom: 22px;
+}
+
+.section-label {
+  color: var(--blue);
+  font-weight: 900;
+  font-size: .82rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.section h2 {
+  margin: 5px 0 8px;
+  color: var(--navy);
+  font-size: clamp(1.65rem, 3vw, 2.25rem);
+  line-height: 1.15;
+}
+
+.section h3 {
+  margin: 0 0 8px;
+  color: var(--navy);
+}
+
+.section p {
+  color: var(--muted);
+}
+
+.grid {
+  display: grid;
+  gap: 16px;
+}
+
+.grid-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.grid-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.grid-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.card {
+  padding: 22px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: var(--soft);
+}
+
+.card h3,
+.card h4 {
+  margin-top: 0;
+  color: var(--navy);
+}
+
+.card p {
+  margin-bottom: 0;
+}
+
+.card-icon {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: #e0f2fe;
+  font-size: 1.4rem;
+  margin-bottom: 14px;
+}
+
+.check-list {
+  list-style: none;
+  padding: 0;
+  margin: 14px 0 0;
+}
+
+.check-list li {
+  position: relative;
+  padding-left: 28px;
+  margin: 9px 0;
+  color: var(--muted);
+}
+
+.check-list li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: var(--green);
+  font-weight: 900;
+}
+
+/* =========================
+   START HERE
+========================= */
+
+.start-card {
+  background: linear-gradient(135deg, #eff6ff, #ecfeff);
+  border: 1px solid #bae6fd;
+}
+
+.step {
+  position: relative;
+  padding: 22px;
+  border-radius: 16px;
+  background: white;
+  border: 1px solid var(--border);
+}
+
+.step-number {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  color: white;
+  font-weight: 900;
+  background: linear-gradient(135deg, var(--blue), var(--cyan));
+  margin-bottom: 14px;
+}
+
+.step h3 {
+  margin-bottom: 6px;
+}
+
+/* =========================
+   REQUIREMENTS
+========================= */
+
+.requirement-card {
+  border-top: 4px solid var(--blue);
+}
+
+.requirement-card.recommended {
+  border-top-color: var(--green);
+}
+
+.requirement-card.warning {
+  border-top-color: var(--yellow);
+}
+
+.requirement-card strong {
+  display: block;
+  color: var(--navy);
+  font-size: 1.15rem;
+  margin-bottom: 6px;
+}
+
+.info-box {
+  padding: 18px 20px;
+  border-radius: 14px;
+  background: #eff6ff;
+  border-left: 5px solid var(--blue);
+  color: var(--muted);
+}
+
+.warning-box {
+  padding: 18px 20px;
+  border-radius: 14px;
+  background: #fffbeb;
+  border-left: 5px solid var(--yellow);
+  color: #78350f;
+}
+
+.success-box {
+  padding: 18px 20px;
+  border-radius: 14px;
+  background: #ecfdf5;
+  border-left: 5px solid var(--green);
+  color: #065f46;
+}
+
+/* =========================
+   TRAINING
+========================= */
+
+.resource {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: white;
+}
+
+.resource-title {
+  font-weight: 850;
+  color: var(--navy);
+}
+
+.resource-subtitle {
+  color: var(--muted);
+  font-size: .88rem;
+}
+
+.resource .btn {
+  flex-shrink: 0;
+  padding: 9px 13px;
+  font-size: .86rem;
+}
+
+/* =========================
+   EARNINGS
+========================= */
+
+.earnings-highlight {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.earning-box {
+  padding: 24px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #eff6ff, #ecfeff);
+  border: 1px solid #bae6fd;
+}
+
+.earning-value {
+  font-size: 2rem;
+  font-weight: 950;
+  color: var(--navy);
+}
+
+.earning-label {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+details {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: white;
+  overflow: hidden;
+}
+
+details + details {
+  margin-top: 10px;
+}
+
+summary {
+  cursor: pointer;
+  padding: 17px 20px;
+  font-weight: 850;
+  color: var(--navy);
+}
+
+.details-content {
+  padding: 0 20px 20px;
+  color: var(--muted);
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  min-width: 650px;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 13px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+
+th {
+  background: var(--navy);
+  color: white;
+}
+
+tbody tr:nth-child(even) {
+  background: var(--soft);
+}
+
+/* =========================
+   APPLY
+========================= */
+
+.apply-section {
+  background:
+    linear-gradient(135deg, #0b1c55, #123b91);
+  color: white;
+}
+
+.apply-section h2,
+.apply-section h3 {
+  color: white;
+}
+
+.apply-section p {
+  color: rgba(255,255,255,.75);
+}
+
+.apply-step {
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: 18px;
+  padding: 24px;
+}
+
+.apply-step h3 {
+  margin-bottom: 8px;
+}
+
+.apply-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 18px;
+  padding: 16px;
+  background: white;
+  color: var(--navy);
+  border-radius: 14px;
+  text-decoration: none;
+  font-weight: 850;
+}
+
+.apply-link:hover {
+  transform: translateY(-2px);
+}
+
+.recruiter {
+  margin-top: 18px;
+  padding: 18px;
+  text-align: center;
+  background: white;
+  color: var(--navy);
+  border-radius: 14px;
+}
+
+.recruiter-label {
+  color: var(--muted);
+  font-size: .82rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.recruiter-name {
+  font-size: 1.4rem;
+  font-weight: 950;
+  color: var(--red);
+  margin-top: 5px;
+}
+
+/* =========================
+   FAQ
+========================= */
+
+.faq summary {
+  font-size: 1rem;
+}
+
+.faq p {
+  margin: 0;
+}
+
+/* =========================
+   TRUST
+========================= */
+
+.trust-card {
+  border-left: 5px solid var(--green);
+}
+
+/* =========================
+   STICKY APPLY
+========================= */
+
+.sticky-apply {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  z-index: 900;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 20px;
+  border-radius: 999px;
+  background: var(--green);
+  color: white;
+  text-decoration: none;
+  font-weight: 900;
+  box-shadow: 0 15px 35px rgba(16,185,129,.35);
+}
+
+.sticky-apply:hover {
+  transform: translateY(-3px);
+}
+
+/* =========================
+   FOOTER
+========================= */
+
+footer {
+  background: #07133d;
+  color: white;
+  padding: 40px 0;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr;
+  gap: 30px;
+}
+
+footer h3 {
+  margin-top: 0;
+}
+
+footer p,
+footer li {
+  color: rgba(255,255,255,.68);
+}
+
+footer ul {
+  list-style: none;
+  padding: 0;
+}
+
+footer li {
+  margin: 8px 0;
+}
+
+footer a {
+  color: rgba(255,255,255,.8);
+  text-decoration: none;
+}
+
+footer a:hover {
+  color: white;
+}
+
+.footer-bottom {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255,255,255,.12);
+  color: rgba(255,255,255,.5);
+  font-size: .88rem;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 900px) {
+
+  .nav-links {
+    display: none;
+    position: absolute;
+    top: 72px;
+    left: 16px;
+    right: 16px;
+    padding: 12px;
+    background: var(--navy);
+    border-radius: 14px;
+    box-shadow: var(--shadow-lg);
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .nav-links.open {
+    display: flex;
+  }
+
+  .nav-links a {
+    display: block;
+  }
+
+  .mobile-toggle {
+    display: block;
+  }
+
+  .grid-3,
+  .grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 650px) {
+
+  .container {
+    width: min(var(--max), calc(100% - 22px));
+  }
+
+  main {
+    padding-top: 16px;
+  }
+
+  .hero {
+    padding: 34px 24px;
+    border-radius: 22px;
+  }
+
+  .section {
+    padding: 22px 18px;
+    border-radius: 17px;
+  }
+
+  .grid-2,
+  .grid-3,
+  .grid-4,
+  .earnings-highlight {
+    grid-template-columns: 1fr;
+  }
+
+  .resource {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .resource .btn {
+    width: 100%;
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sticky-apply {
+    right: 12px;
+    bottom: 12px;
+    left: 12px;
+    justify-content: center;
+  }
+}
+</style>
 </head>
 
 <body>
-  <!-- ===== HEADER ===== -->
-  <header>
-    <div class="container">
-      <div class="header-inner">
-        <div class="brand">
-          <div class="logo-icon">🗺️</div>
-          <div class="brand-text">
-            <h1>Data <span>Annotator</span> — Map Labeler</h1>
-            <small>Training • Quality Control • Growth Path</small>
-          </div>
+
+<a href="#main" class="skip-link">Skip to content</a>
+
+<header>
+  <div class="container navbar">
+
+    <a href="#top" class="brand">
+      <div class="logo">🗺️</div>
+
+      <div>
+        <div class="brand-title">RGC Map Labeler</div>
+        <div class="brand-subtitle">Training • Quality Control • Growth</div>
+      </div>
+    </a>
+
+    <button
+      class="mobile-toggle"
+      id="mobileToggle"
+      aria-label="Open navigation"
+      aria-expanded="false"
+    >
+      ☰
+    </button>
+
+    <nav class="nav-links" id="navLinks">
+
+      <a href="#start">Start Here</a>
+      <a href="#requirements">Requirements</a>
+      <a href="#training">Training</a>
+      <a href="#earnings">Earnings</a>
+      <a href="#faq">FAQ</a>
+
+      <a class="nav-apply" href="#apply">
+        🚀 Apply Now
+      </a>
+
+    </nav>
+
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- HERO -->
+
+  <section class="container">
+
+    <div class="hero">
+
+      <div class="hero-content">
+
+        <div class="eyebrow">
+          🧭 New applicant guide
         </div>
-        
-        <button class="mobile-btn" id="mobileBtn" aria-expanded="false">
-          ☰ Menu
-        </button>
-        
-        <nav>
-          <ul>
-            <li><a href="#" class="nav-link active" data-page="home">🏠 Home</a></li>
-            <li><a href="#" class="nav-link" data-page="introduction">📘 Introduction</a></li>
-            <li><a href="#" class="nav-link" data-page="requirements">✅ Requirements</a></li>
-            <li><a href="#" class="nav-link" data-page="software">⬇️ Downloads</a></li>
-            <li><a href="#" class="nav-link nav-highlight" data-page="apply">🚀 Apply Now</a></li>
-            <li class="dropdown">
-              <button class="nav-pill" id="moreBtn" aria-expanded="false">
-                More ▾
-              </button>
-              <div class="dropdown-menu" id="moreMenu">
-                <div class="dropdown-header">Quick Links</div>
-                <a href="#" class="nav-link" data-page="payment">
-                  💸 Payment Sample
-                  <span class="sub-text">Benchmark (BM) • Rates • Reminders</span>
-                </a>
-                <a href="#" class="nav-link" data-page="guide">
-                  🧭 Guide / Steps
-                  <span class="sub-text">From videos → training → production</span>
-                </a>
-                <a href="#" class="nav-link" data-page="faq">
-                  ❓ FAQ
-                  <span class="sub-text">Common questions answered</span>
-                </a>
+
+        <h1>
+          Earn by Helping Build Better Digital Maps
+        </h1>
+
+        <p>
+          Become a Map Labeler and Data Annotator. Learn how to work with
+          satellite imagery, create accurate map data, complete training,
+          pass the required exams, and begin production work.
+        </p>
+
+        <div class="hero-actions">
+
+          <a href="#start" class="btn btn-primary">
+            Start Here →
+          </a>
+
+          <a href="#requirements" class="btn btn-secondary">
+            Check Requirements
+          </a>
+
+          <a href="#apply" class="btn btn-outline">
+            Apply Now
+          </a>
+
+        </div>
+
+        <div class="hero-highlights">
+
+          <span class="highlight">🖥️ Windows 10/11 64-bit</span>
+          <span class="highlight">📶 Stable Internet</span>
+          <span class="highlight">🎓 Training Provided</span>
+          <span class="highlight">📈 Growth Opportunities</span>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- START HERE -->
+
+  <section id="start" class="container section start-card">
+
+    <div class="section-header">
+
+      <div class="section-label">Start here</div>
+
+      <h2>
+        Your path from applicant to map labeler
+      </h2>
+
+      <p>
+        Follow these steps in order. This makes the process easier and helps
+        you understand what to do next.
+      </p>
+
+    </div>
+
+    <div class="grid grid-3">
+
+      <div class="step">
+        <div class="step-number">1</div>
+
+        <h3>Check your setup</h3>
+
+        <p>
+          Make sure your computer, operating system, RAM, and internet
+          connection meet the requirements.
+        </p>
+      </div>
+
+      <div class="step">
+        <div class="step-number">2</div>
+
+        <h3>Learn the basics</h3>
+
+        <p>
+          Watch the training materials and understand the tools and mapping
+          standards before starting exams.
+        </p>
+      </div>
+
+      <div class="step">
+        <div class="step-number">3</div>
+
+        <h3>Install Ginger</h3>
+
+        <p>
+          Download the required annotation software and prepare your work
+          environment.
+        </p>
+      </div>
+
+      <div class="step">
+        <div class="step-number">4</div>
+
+        <h3>Complete exams</h3>
+
+        <p>
+          Complete the required training tasks for Building Repair,
+          Landcover, and Transportation.
+        </p>
+      </div>
+
+      <div class="step">
+        <div class="step-number">5</div>
+
+        <h3>Apply and get assisted</h3>
+
+        <p>
+          Message the recruiter and complete the registration sheet so you
+          can receive assistance and onboarding information.
+        </p>
+      </div>
+
+      <div class="step">
+        <div class="step-number">6</div>
+
+        <h3>Production and QC</h3>
+
+        <p>
+          Start working on tasks, receive quality feedback, fix pushbacks,
+          and improve your performance.
+        </p>
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- WHAT YOU DO -->
+
+  <section class="container section">
+
+    <div class="section-header">
+
+      <div class="section-label">The work</div>
+
+      <h2>
+        What does a Map Labeler do?
+      </h2>
+
+      <p>
+        You interpret satellite imagery and convert visible features into
+        structured digital map data.
+      </p>
+
+    </div>
+
+    <div class="grid grid-4">
+
+      <div class="card">
+
+        <div class="card-icon">🏢</div>
+
+        <h3>Building Creation</h3>
+
+        <p>
+          Draw building footprints on imagery and create accurate shapes.
+        </p>
+
+        <ul class="check-list">
+          <li>Trace building footprints</li>
+          <li>Follow corners and curves</li>
+          <li>Separate structures correctly</li>
+        </ul>
+
+      </div>
+
+      <div class="card">
+
+        <div class="card-icon">🛠️</div>
+
+        <h3>Building Repair</h3>
+
+        <p>
+          Correct existing building shapes and fix inaccurate labels.
+        </p>
+
+        <ul class="check-list">
+          <li>Fix shifted polygons</li>
+          <li>Split or merge shapes</li>
+          <li>Remove false positives</li>
+        </ul>
+
+      </div>
+
+      <div class="card">
+
+        <div class="card-icon">🛣️</div>
+
+        <h3>Transportation</h3>
+
+        <p>
+          Create road centerlines and apply the required measurements.
+        </p>
+
+        <ul class="check-list">
+          <li>Follow road curves</li>
+          <li>Keep lines centered</li>
+          <li>Follow project instructions</li>
+        </ul>
+
+      </div>
+
+      <div class="card">
+
+        <div class="card-icon">🌿</div>
+
+        <h3>Landcover</h3>
+
+        <p>
+          Classify land areas based on their visible characteristics.
+        </p>
+
+        <ul class="check-list">
+          <li>Forest</li>
+          <li>Water</li>
+          <li>Urban and agricultural areas</li>
+        </ul>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- REQUIREMENTS -->
+
+  <section id="requirements" class="container section">
+
+    <div class="section-header">
+
+      <div class="section-label">Before applying</div>
+
+      <h2>
+        Check your requirements
+      </h2>
+
+      <p>
+        Make sure your computer and internet connection are ready before
+        beginning the training process.
+      </p>
+
+    </div>
+
+    <div class="grid grid-3">
+
+      <div class="card requirement-card">
+
+        <h3>🖥️ Computer</h3>
+
+        <strong>Windows 10/11 • 64-bit</strong>
+
+        <ul class="check-list">
+          <li>Desktop or laptop</li>
+          <li>At least 8GB RAM recommended</li>
+          <li>64-bit Windows system</li>
+        </ul>
+
+      </div>
+
+      <div class="card requirement-card recommended">
+
+        <h3>📶 Internet</h3>
+
+        <strong>Stable connection</strong>
+
+        <ul class="check-list">
+          <li>Reliable connection</li>
+          <li>Avoid frequent disconnections</li>
+          <li>Stable is better than unstable fast internet</li>
+        </ul>
+
+      </div>
+
+      <div class="card requirement-card warning">
+
+        <h3>🖱️ Helpful equipment</h3>
+
+        <strong>Precision makes work easier</strong>
+
+        <ul class="check-list">
+          <li>Good mouse</li>
+          <li>Large monitor if available</li>
+          <li>Quiet workspace</li>
+        </ul>
+
+      </div>
+
+    </div>
+
+    <div class="info-box" style="margin-top:20px">
+
+      <strong>Important:</strong>
+      The exact software and project requirements may change depending on
+      the current project. Always follow the latest instructions provided
+      during training.
+
+    </div>
+
+  </section>
+
+
+  <!-- TRAINING -->
+
+  <section id="training" class="container section">
+
+    <div class="section-header">
+
+      <div class="section-label">Learn before production</div>
+
+      <h2>
+        Training and required exams
+      </h2>
+
+      <p>
+        Watch the training materials, understand the workflow, and complete
+        the required exams before production work.
+      </p>
+
+    </div>
+
+    <div class="grid grid-2">
+
+      <div>
+
+        <h3>📚 Training resources</h3>
+
+        <div style="display:grid;gap:10px;margin-top:15px">
+
+          <div class="resource">
+
+            <div>
+              <div class="resource-title">
+                🛠️ Basic Tools Video
               </div>
+
+              <div class="resource-subtitle">
+                Learn the basic tools and interface
+              </div>
+            </div>
+
+            <a
+              class="btn btn-primary"
+              target="_blank"
+              rel="noopener"
+              href="https://drive.google.com/file/d/1HvLMhJKNapzOB0VgC0uJ4sWGxUzp9uHi/view"
+            >
+              Open
+            </a>
+
+          </div>
+
+          <div class="resource">
+
+            <div>
+              <div class="resource-title">
+                📁 Standard Training Exam
+              </div>
+
+              <div class="resource-subtitle">
+                Training materials and tasks
+              </div>
+            </div>
+
+            <a
+              class="btn btn-primary"
+              target="_blank"
+              rel="noopener"
+              href="https://drive.google.com/drive/folders/1-KnatBzY5D-371Imy6CFn5L7Cb5vhKHG"
+            >
+              Open
+            </a>
+
+          </div>
+
+          <div class="resource">
+
+            <div>
+              <div class="resource-title">
+                🌿 Landcover Training Exam
+              </div>
+
+              <div class="resource-subtitle">
+                Learn landcover annotation
+              </div>
+            </div>
+
+            <a
+              class="btn btn-primary"
+              target="_blank"
+              rel="noopener"
+              href="https://youtu.be/xNHKSv2mV-g"
+            >
+              Open
+            </a>
+
+          </div>
+
+          <div class="resource">
+
+            <div>
+              <div class="resource-title">
+                🛣️ Transportation Guide
+              </div>
+
+              <div class="resource-subtitle">
+                Transportation mapping instructions
+              </div>
+            </div>
+
+            <a
+              class="btn btn-primary"
+              target="_blank"
+              rel="noopener"
+              href="https://docs.google.com/document/d/1oV1kJYEUaQZGAw_HSDltcl8GqsisXCabS8mcFsbkl_U/edit"
+            >
+              Open
+            </a>
+
+          </div>
+
+          <div class="resource">
+
+            <div>
+              <div class="resource-title">
+                🛣️ Topology Error Guide
+              </div>
+
+              <div class="resource-subtitle">
+                Learn about common topology issues
+              </div>
+            </div>
+
+            <a
+              class="btn btn-primary"
+              target="_blank"
+              rel="noopener"
+              href="https://drive.google.com/file/d/18v2XThEtr9Ea0j7gq6az09nq2GAFl6Ay/view"
+            >
+              Open
+            </a>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div>
+
+        <h3>🧪 Required training tasks</h3>
+
+        <div class="card" style="margin-top:15px">
+
+          <ul class="check-list">
+
+            <li>
+              <strong>34 tasks</strong> — Building Repair
             </li>
+
+            <li>
+              <strong>18 tasks</strong> — Landcover
+            </li>
+
+            <li>
+              <strong>27 tasks</strong> — Transportation
+            </li>
+
           </ul>
-        </nav>
-      </div>
-      
-      <!-- Mobile Navigation -->
-      <div class="mobile-nav" id="mobileNav">
-        <div class="mobile-nav-inner">
-          <a href="#" class="nav-link active" data-page="home">🏠 Home</a>
-          <a href="#" class="nav-link" data-page="introduction">📘 Introduction</a>
-          <a href="#" class="nav-link" data-page="requirements">✅ Requirements</a>
-          <a href="#" class="nav-link" data-page="software">⬇️ Downloads</a>
-          <a href="#" class="nav-link" data-page="apply">🚀 Apply Now</a>
-          <a href="#" class="nav-link indent" data-page="payment">💸 Payment Sample</a>
-          <a href="#" class="nav-link indent" data-page="guide">🧭 Guide / Steps</a>
-          <a href="#" class="nav-link indent" data-page="faq">❓ FAQ</a>
+
         </div>
+
+        <div class="success-box" style="margin-top:15px">
+
+          <strong>Recommended approach:</strong>
+
+          <br>
+
+          Accuracy first. Once you understand the standards and can produce
+          consistent quality, gradually improve your speed.
+
+        </div>
+
       </div>
+
     </div>
-  </header>
-  
-  <!-- ===== MAIN CONTENT ===== -->
-  <main class="container">
-    
-    <!-- ==================== HOME PAGE ==================== -->
-    <section class="page active" id="home-page">
-      <div class="hero">
-        <div>
-          <h2>Become a Map Labeler (Data Annotator)</h2>
-          <p>Annotate satellite imagery by drawing and correcting map features — buildings, roads, and landcover. Your work helps create accurate digital maps used for navigation, planning, and location services worldwide.</p>
-          
-          <div class="badge-row">
-            <span class="badge">🖥️ Windows 10/11</span>
-            <span class="badge">📶 Stable Internet</span>
-            <span class="badge">🧪 Training Exams</span>
-            <span class="badge">📈 Promotion Path</span>
-          </div>
-          
-          <div class="hero-actions">
-            <a href="#" class="btn btn-primary nav-link" data-page="apply">🚀 Apply Now →</a>
-            <a href="#" class="btn btn-secondary nav-link" data-page="introduction">📘 What the Job Entails</a>
-            <a href="#" class="btn btn-secondary nav-link" data-page="requirements">✅ Check Requirements</a>
-          </div>
-        </div>
-        
-        <div class="hero-card">
-          <h3>🗺️ What You'll Work On</h3>
-          <ul>
-            <li><strong>Building Creation:</strong> Draw building footprints on blank maps.</li>
-            <li><strong>Building Repair:</strong> Fix pre-labeled building shapes.</li>
-            <li><strong>Road Centreline:</strong> Draw road center lines + measure width.</li>
-            <li><strong>Landcover:</strong> Label land areas by classification.</li>
-          </ul>
-          <div class="callout" style="margin-top:14px">
-            <strong>💡 Quality matters.</strong> Speed helps, but accuracy keeps your tasks from being pushed back.
-          </div>
-        </div>
-      </div>
-      
-      <div class="section">
-        <h3>✨ Quick Overview</h3>
-        <div class="kpi-grid">
-          <div class="kpi-tile">
-            <div class="kpi-title">📝 Annotate</div>
-            <div class="kpi-desc">Draw/repair features using Ginger software</div>
-          </div>
-          <div class="kpi-tile">
-            <div class="kpi-title">🔍 QC Review</div>
-            <div class="kpi-desc">Checker → Judger → Reviewer</div>
-          </div>
-          <div class="kpi-tile">
-            <div class="kpi-title">📈 Improve</div>
-            <div class="kpi-desc">Fix pushbacks + learn standards</div>
-          </div>
-          <div class="kpi-tile">
-            <div class="kpi-title">🏆 Promote</div>
-            <div class="kpi-desc">Top labelers become checkers/judgers</div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="section">
-        <h3>🧠 What Makes a Strong Labeler?</h3>
-        <div class="grid grid-auto">
-          <div class="card">
-            <h4>🎯 Consistency</h4>
-            <p>Follow the same rules every time: geometry, tags, and boundary alignment. Consistent work passes QC faster.</p>
-          </div>
-          <div class="card">
-            <h4>👁️ Attention to Detail</h4>
-            <p>Clean corners, avoid overlaps/gaps (unless instructed), and ensure correct classifications on every feature.</p>
-          </div>
-          <div class="card">
-            <h4>📚 Coachability</h4>
-            <p>Use pushback feedback as free training. It's annoying… but extremely useful for improving your skills.</p>
-          </div>
-          <div class="card">
-            <h4>⚖️ Speed + Quality Balance</h4>
-            <p>Benchmark targets matter, but poor quality reduces earnings due to rework time. Find the right balance.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-    
-    <!-- ==================== INTRODUCTION PAGE ==================== -->
-    <section class="page" id="introduction-page">
-      <div class="section">
-        <h3>📘 What the Job Entails</h3>
-        <p class="section-intro">As a Map Labeler, you'll interpret satellite imagery and convert it into structured map data. You'll draw shapes (polygons/lines) and apply correct classifications so the map matches reality.</p>
-      </div>
-      
-      <div class="section">
-        <h3>🧩 Mapping Services (Projects)</h3>
-        <p class="section-intro">You will work on various mapping projects, including:</p>
-        <div class="grid grid-2">
-          <div class="card">
-            <h4>🏢 Building Creation</h4>
-            <p>Labeling buildings and drawing their shapes on blank maps.</p>
-            <ul>
-              <li>Trace roof footprints accurately</li>
-              <li>Follow corners and curves cleanly</li>
-              <li>Separate adjacent structures correctly</li>
-              <li>Apply correct building classifications</li>
-            </ul>
-          </div>
-          <div class="card">
-            <h4>🛠️ Building Repair</h4>
-            <p>Correcting inaccuracies in pre-labeled building shapes.</p>
-            <ul>
-              <li>Fix shifted or warped polygons</li>
-              <li>Split/merge shapes when needed</li>
-              <li>Remove false positives</li>
-              <li>Improve boundary accuracy</li>
-            </ul>
-          </div>
-          <div class="card">
-            <h4>🛣️ Road Centreline</h4>
-            <p>Drawing lines in the middle of roads and measuring their width.</p>
-            <ul>
-              <li>Follow road curvature precisely</li>
-              <li>Keep centerline perfectly centered</li>
-              <li>Set width per project instructions</li>
-              <li>Connect road segments properly</li>
-            </ul>
-          </div>
-          <div class="card">
-            <h4>🌿 Landcover Project</h4>
-            <p>Labeling areas of land based on their classification.</p>
-            <ul>
-              <li>Forest, water, urban, agriculture, etc.</li>
-              <li>Use consistent boundaries</li>
-              <li>Resolve ambiguous imagery carefully</li>
-              <li>Follow classification guidelines</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-      
-      <div class="section">
-        <h3>🔎 Workflow (Quality Control)</h3>
-        <p class="section-intro">Your work goes through a rigorous quality control process to ensure accuracy and consistency:</p>
-        
-        <div class="timeline">
-          <div class="timeline-step">
-            <div class="step-number">1</div>
-            <h4>📝 Labeling</h4>
-            <p>You download a task and complete the annotations using Ginger software.</p>
-          </div>
-          <div class="timeline-step">
-            <div class="step-number">2</div>
-            <h4>🔍 Checking</h4>
-            <p>A checker reviews your work for quality. Substandard work is "pushed back" to you for corrections.</p>
-          </div>
-          <div class="timeline-step">
-            <div class="step-number">3</div>
-            <h4>⚖️ Judging</h4>
-            <p>The work is sent to a higher-level "judger" for further review and validation.</p>
-          </div>
-          <div class="timeline-step">
-            <div class="step-number">4</div>
-            <h4>✅ Reviewing</h4>
-            <p>Finally, a reviewer approves the task, and payment is processed for completed work.</p>
-          </div>
-        </div>
-        
-        <div class="callout warning" style="margin-top:20px">
-          <strong>⚠️ Pushback isn't failure!</strong> It's part of the QC process. Fixing pushbacks quickly and correctly improves your rating and helps you learn the standards faster.
-        </div>
-      </div>
-      
-      <div class="section">
-        <h3>🏅 Promotion Path</h3>
-        <p class="section-intro">High-performing labelers can be promoted to higher-paying roles:</p>
-        <div class="grid grid-2">
-          <div class="card">
-            <h4>📈 How Promotions Work</h4>
-            <p>To be considered for promotion, you need:</p>
-            <ul>
-              <li><strong>Consistent accuracy</strong> — Low error rate on tasks</li>
-              <li><strong>Low pushback rate</strong> — Fewer corrections needed</li>
-              <li><strong>Good communication</strong> — Responsive and accountable</li>
-              <li><strong>Volume</strong> — Completing tasks regularly</li>
-            </ul>
-          </div>
-          <div class="card">
-            <h4>💼 Role Expectations</h4>
-            <p>As you move up, the focus shifts:</p>
-            <ul>
-              <li><strong>Checker:</strong> Review others' work + send actionable feedback</li>
-              <li><strong>Judger:</strong> Resolve edge cases + enforce standards</li>
-              <li><strong>Reviewer:</strong> Final approval before payment</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </section>
-    
-    <!-- ==================== REQUIREMENTS PAGE ==================== -->
-    <section class="page" id="requirements-page">
-      <div class="section">
-        <h3>✅ System Requirements</h3>
-        <div class="grid grid-3">
-          <div class="card">
-            <h4>🖥️ Desktop/Laptop</h4>
-            <p>You need a Windows computer:</p>
-            <ul>
-              <li>Windows OS 10/11 (64-bit)</li>
-              <li>Minimum 4GB RAM</li>
-              <li>Dedicated graphics card recommended</li>
-              <li>Screen resolution: 1280x720 minimum</li>
-            </ul>
-          </div>
-          <div class="card">
-            <h4>📶 Internet Connection</h4>
-            <p>Stable connection required:</p>
-            <ul>
-              <li>Stable broadband connection</li>
-              <li>Minimum 5 Mbps download speed</li>
-              <li>Low latency for real-time tasks</li>
-              <li>Unlimited data recommended</li>
-            </ul>
-          </div>
-          <div class="card">
-            <h4>🧰 Helpful Extras</h4>
-            <p>Not required, but very helpful:</p>
-            <ul>
-              <li>Precise mouse with scroll wheel</li>
-              <li>Large monitor (less zoom fatigue)</li>
-              <li>Quiet workspace</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-      
-      <div class="section">
-        <h3>🎓 Application Process & Training</h3>
-        
-        <div class="callout" style="margin-bottom:20px">
-          <strong>📋 Do this in order:</strong> Watch training videos → Download Ginger → Log in → Complete exams → Start production work
-        </div>
-        
-        <div class="grid grid-2">
-          <div class="card">
-            <h4>📺 Training Videos</h4>
-            <p>Take time to watch all videos before starting exams:</p>
-            <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">
-              <div class="tag">
-                🛠️ <a href="https://drive.google.com/file/d/1HvLMhJKNapzOB0VgC0uJ4sWGxUzp9uHi/view?fbclid=IwAR1p-H4lDS3GDA4kqaV4vm6WrCqPcAnRr1P9eZJRJG7skADMA-mkHlapjZU" target="_blank" rel="noopener">Basic Tools Video</a>
-              </div>
-              <div class="tag">
-                📁 <a href="https://drive.google.com/drive/folders/1-KnatBzY5D-371Imy6CFn5L7Cb5vhKHG" target="_blank" rel="noopener">Standard Training Exam</a>
-              </div>
-              <div class="tag">
-                🌿 <a href="https://www.youtube.com/watch?si=bAaqDH4-nfLVg2K1&v=fc1MKGzxUqE&feature=youtu.be" target="_blank" rel="noopener">Landcover Training Exam</a>
-              </div>
-            </div>
-          </div>
-          
-          <div class="card">
-            <h4>🧪 Exams You Must Complete</h4>
-            <p>Finish all required tasks to qualify:</p>
-            <ul>
-              <li><strong>34 tasks</strong> — Building Repair (BR) exam</li>
-              <li><strong>18 tasks</strong> — Landcover (LC) exam</li>
-              <li><strong>7 tasks</strong> — 3D Matching (3DM) exam</li>
-            </ul>
-            <p style="margin-top:10px;color:var(--muted)">Training videos are provided for each exam type to help you succeed.</p>
-          </div>
-        </div>
-      </div>
-      
-      <div class="section">
-        <h3>🧾 Getting Started Checklist</h3>
-        <div class="card">
-          <h4>📋 Follow These Steps</h4>
-          <ol>
-            <li><strong>Download Ginger software</strong> from the Downloads page</li>
-            <li><strong>Contact the Admins</strong> via Discord (Apply page)</li>
-            <li><strong>Fill up the registration form</strong> with guidance</li>
-            <li><strong>Get your login credentials</strong> (UID and password)</li>
-            <li><strong>Open Ginger</strong> and log in with your credentials</li>
-            <li><strong>Watch training videos</strong> before starting exams</li>
-            <li><strong>Complete all required exams</strong> (BR, LC, 3DM)</li>
-            <li><strong>Start production work</strong> after passing training</li>
-          </ol>
-        </div>
-      </div>
-    </section>
-    
-    <!-- ==================== SOFTWARE PAGE ==================== -->
-    <section class="page" id="software-page">
-      <div class="section">
-        <h3>⬇️ Software Downloads</h3>
-        <p class="section-intro">You'll use Ginger software for all annotation tasks — labeling, corrections, and QC feedback loops.</p>
-        
-        <div class="grid grid-2">
-          <div class="card">
-            <h4>📦 Ginger Annotation Software</h4>
-            <p>This specialized software is required for all map labeling tasks. It provides the tools needed for precise annotation of buildings, roads, and landcover features.</p>
-            
-            <div class="badge-row" style="margin-top:12px">
-              <span class="badge">Windows 10/11</span>
-              <span class="badge">64-bit</span>
-              <span class="badge">4GB+ RAM</span>
-            </div>
-            
-            <div style="margin-top:16px">
-              <a href="https://drive.google.com/file/d/1rCLMWqjyulaYIdLsD8zmwhfPolxzFcPE/view" target="_blank" rel="noopener" class="btn btn-primary">
-                ⬇️ Download Ginger Software
-              </a>
-            </div>
-            
-            <p style="margin-top:12px;font-size:.9rem;color:var(--muted)">
-              File size: ~85 MB | Version: 2.4.1 | Last updated: Jan 2024
-            </p>
-          </div>
-          
-          <div class="card">
-            <h4>🛠️ Installation Instructions</h4>
-            <ol>
-              <li>Download the Ginger software installer</li>
-              <li>Run the installer file (Ginger_Setup_v2.4.1.exe)</li>
-              <li>Run as administrator if prompted</li>
-              <li>Follow the on-screen installation instructions</li>
-              <li>Accept the license agreement</li>
-              <li>Keep default installation path (recommended)</li>
-              <li>Complete installation and launch the software</li>
-              <li>Log in with your assigned UID and password</li>
-            </ol>
-          </div>
-        </div>
-      </div>
-      
-      <div class="section">
-        <h3>🛟 Support & Troubleshooting</h3>
-        <div class="card">
-          <h4>❓ Common Issues & Solutions</h4>
-          <ul>
-            <li><strong>Won't install:</strong> Run as administrator, check Windows security prompts</li>
-            <li><strong>Won't launch:</strong> Check antivirus, ensure .NET Framework is installed</li>
-            <li><strong>Login fails:</strong> Verify credentials, check for spaces/caps in password</li>
-            <li><strong>Slow performance:</strong> Close other applications, check internet connection</li>
-          </ul>
-        </div>
-      </div>
-    </section>
-    
-    <!-- ==================== APPLY PAGE ==================== -->
-    <section class="page" id="apply-page">
-      <div class="section">
-        <h3>🚀 Apply Now</h3>
-        <p class="section-intro">To begin your application, you must contact our admins on Discord. They will add you to the group chat and guide you through the registration form for training.</p>
-      </div>
-      
-      <div class="section">
-        <h3>💬 Step 1: Contact Admins on Discord</h3>
-        <div class="apply-grid">
-          <div class="card">
-            <h4>👾 Discord Admins</h4>
-            <p>Message any of the following admins to get started:</p>
-            <div class="admin-list">
-              <div class="admin-badge">
-                <span class="admin-icon">👤</span> Kuaxiu
-              </div>
-              <div class="admin-badge">
-                <span class="admin-icon">👤</span> Ali
-              </div>
-            </div>
-            <div class="callout info" style="margin-top:16px">
-               <strong>ℹ️ Instruction:</strong> DM them to say you want to apply as a Map Labeler.
-            </div>
-          </div>
-          
-          <div class="card">
-            <h4>✅ What They Will Do</h4>
-            <p>Once you contact them, they will:</p>
-            <ul>
-              <li>Add you to the official Group Chat</li>
-              <li>Provide the Registration Form link</li>
-              <li>Guide you on how to fill up the form</li>
-              <li>Give you access to training materials</li>
-              <li>Assist you with login credentials</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-      
-      <div class="section">
-        <h3>📝 Step 2: Training & Registration</h3>
-        <div class="card">
-          <h4>📋 Registration Process</h4>
-          <p>Once you are in contact with <strong>Kuaxiu</strong> or <strong>Ali</strong>, they will assist you with:</p>
-          <ul style="margin-top:10px">
-            <li>Filling up the registration form correctly</li>
-            <li>Setting up your accounts</li>
-            <li>Starting your training exams (BR, LC, 3DM)</li>
-          </ul>
-          
-          <div class="callout warning" style="margin-top:16px">
-            <strong>⚠️ IMPORTANT:</strong> Do not fill up the form without Admin guidance. They will help you ensure your details are correct so your account is created successfully.
-          </div>
-        </div>
-      </div>
-      
-      <div class="section">
-        <h3>🧠 Before You Message</h3>
-        <p class="section-intro">Make sure you're prepared for faster assistance:</p>
-        <div class="grid grid-3">
-          <div class="card">
-            <h4>🖥️ Have Your Device Ready</h4>
-            <p>Windows 10/11 (64-bit) computer with stable internet connection. 4GB RAM minimum.</p>
-          </div>
-          <div class="card">
-            <h4>📚 Be Ready for Training</h4>
-            <p>You'll complete BR, LC, and 3DM training exams before production work.</p>
-          </div>
-          <div class="card">
-            <h4>🔄 Expect QC Feedback</h4>
-            <p>Pushbacks happen. Fix them promptly and learn from checker notes.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-    
-    <!-- ==================== PAYMENT PAGE ==================== -->
-    <section class="page" id="payment-page">
-      <div class="section">
-        <h3>💸 Payment Sample & Rates</h3>
-        
-        <div class="callout" style="margin-bottom:20px">
-          <strong>📊 Benchmark (BM) / Rate</strong> — computation of rates per features/tasks/hour. 
-          <span style="color:var(--muted)">(Benchmark will adjust depending on project difficulty)</span>
-        </div>
-        
-        <div class="card">
-          <h4>💰 Standard Rate Explanation</h4>
-          <p>Standard rate is <strong>75 pesos per hour</strong> but it will change depending on your speed and quality. It varies on how fast or slow you finish the task.</p>
-          <ul style="margin-top:10px">
-            <li><strong>Increase:</strong> If you finish the task faster than the average speed needed per hour</li>
-            <li><strong>Decrease:</strong> If you finish slower than the expected benchmark</li>
-          </ul>
-        </div>
-        
-        <div class="table-wrapper">
-          <table>
-            <thead>
-              <tr>
-                <th>Project</th>
-                <th>Task</th>
-                <th>Features/layers</th>
-                <th>Standard Rate</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Building Repair (BR)</td>
-                <td>—</td>
-                <td>800</td>
-                <td>75 pesos/hour</td>
-              </tr>
-              <tr>
-                <td>Filter</td>
-                <td>240</td>
-                <td>—</td>
-                <td>75 pesos/hour</td>
-              </tr>
-              <tr>
-                <td>3D Matching (3DM)</td>
-                <td>—</td>
-                <td>60</td>
-                <td>75 pesos/hour</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        
-        <div class="callout warning" style="margin-top:20px">
-          <strong>⚠️ REMEMBER:</strong> THE PER HOUR IS JUST BASED ON THE AVERAGE SPEED THAT YOU NEED TO REACH TO EARN MORE
-        </div>
-      </div>
-      
-      <div class="section">
-        <h3>🌿 Landcover (LC) Project Rates</h3>
-        <p class="section-intro">Landcover project rates are calculated based on density level (number of features/buildings) and your speed:</p>
-        
-        <div class="table-wrapper">
-          <table>
-            <thead>
-              <tr>
-                <th>Density Level</th>
-                <th>Average Speed</th>
-                <th>Task per Hour</th>
-                <th>Rate</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td>1-5</td><td>1 min</td><td>160 bldgs/hr</td><td>75/hr</td></tr>
-              <tr><td>6-10</td><td>1.5 mins</td><td>290 bldgs/hr</td><td>75/hr</td></tr>
-              <tr><td>11-50</td><td>3 mins</td><td>300 bldgs/hr</td><td>75/hr</td></tr>
-              <tr><td>51-100</td><td>10 mins</td><td>400 bldgs/hr</td><td>75/hr</td></tr>
-              <tr><td>101-300</td><td>20 mins</td><td>600 bldgs/hr</td><td>75/hr</td></tr>
-              <tr><td>300-500</td><td>20 mins</td><td>1000 bldgs/hr</td><td>75/hr</td></tr>
-              <tr><td>501+</td><td>20 mins</td><td>1000 bldgs/hr</td><td>75/hr</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-    
-    <!-- ==================== GUIDE PAGE ==================== -->
-    <section class="page" id="guide-page">
-      <div class="section">
-        <h3>🧭 Guide / Steps</h3>
-        <p class="section-intro">A clear, repeatable workflow helps you pass training and keep QC ratings strong. Follow this guide for the best results.</p>
-      </div>
-      
-      <div class="section">
-        <h3>🪜 Recommended Learning Path</h3>
-        <div class="timeline">
-          <div class="timeline-step">
-            <div class="step-number">1</div>
-            <h4>📺 Watch Videos</h4>
-            <p>Learn the tools first so you don't fight the UI while learning mapping rules. Watch all training videos before starting exams.</p>
-          </div>
-          <div class="timeline-step">
-            <div class="step-number">2</div>
-            <h4>⬇️ Install Ginger</h4>
-            <p>Set up your environment: mouse sensitivity, display scaling, and learn the shortcuts. Familiarize yourself with the interface.</p>
-          </div>
-          <div class="timeline-step">
-            <div class="step-number">3</div>
-            <h4>🧪 Finish Training Exams</h4>
-            <p>Complete BR, LC, and 3DM tasks. Focus on accuracy first, then speed. Don't rush through training.</p>
-          </div>
-          <div class="timeline-step">
-            <div class="step-number">4</div>
-            <h4>🔄 Production + QC</h4>
-            <p>Use feedback from pushbacks to align with standards. Each correction teaches you something valuable.</p>
-          </div>
-        </div>
-      </div>
-      
-      <div class="section">
-        <h3>🧰 Helpful Habits for Success</h3>
-        <div class="grid grid-auto">
-          <div class="card">
-            <h4>🔍 Zoom Discipline</h4>
-            <p>Work at a consistent zoom level when tracing to keep shapes clean and stable. Don't zoom in and out too frequently.</p>
-          </div>
-          <div class="card">
-            <h4>📝 Edge-case Notes</h4>
-            <p>If a feature is ambiguous, leave clear notes (if your tool allows) to help QC understand your decisions.</p>
-          </div>
-          <div class="card">
-            <h4>✅ Self-QA Pass</h4>
-            <p>Before submitting, quickly scan for overlaps, missed features, and incorrect classifications. Catch your own errors.</p>
-          </div>
-          <div class="card">
-            <h4>📚 Learn from Pushbacks</h4>
-            <p>Track the most common corrections and avoid repeating them. Each pushback is a learning opportunity.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-    
-    <!-- ==================== FAQ PAGE ==================== -->
-    <section class="page" id="faq-page">
-      <div class="section">
-        <h3>❓ Frequently Asked Questions</h3>
-        <p class="section-intro">Common questions answered to help you get started.</p>
-      </div>
-      
-      <div class="section">
-        <h3>🚀 Getting Started</h3>
-        <div class="grid grid-1" style="gap:12px">
-          <div class="card">
-            <h4>How do I apply?</h4>
-            <p>Go to the Apply page and contact the admins (Kuaxiu or Ali) on Discord. They will guide you through the process.</p>
-          </div>
-          <div class="card">
-            <h4>What are the requirements?</h4>
-            <p>You need a Windows 10/11 computer (64-bit), 4GB RAM minimum, and stable internet connection. A good mouse is highly recommended.</p>
-          </div>
-          <div class="card">
-            <h4>How long is the training?</h4>
-            <p>Training duration depends on your pace. You need to complete 34 BR tasks, 18 LC tasks, and 7 3DM tasks.</p>
-          </div>
-        </div>
-      </div>
-      
-      <div class="section">
-        <h3>💰 Payment & Earnings</h3>
-        <div class="grid grid-1" style="gap:12px">
-          <div class="card">
-            <h4>How much can I earn?</h4>
-            <p>The standard rate is 75 pesos per hour, but this varies based on your speed and quality. Faster work with high accuracy earns more.</p>
-          </div>
-          <div class="card">
-            <h4>When do I get paid?</h4>
-            <p>Payment processing happens after your work passes QC. Specific payment schedules will be explained in the group chat.</p>
-          </div>
-        </div>
-      </div>
-      
-      <div class="section">
-        <h3>📞 Still Have Questions?</h3>
-        <div class="card">
-          <h4>Contact the Admins</h4>
-          <p>For any questions not answered here, message the admins on Discord.</p>
-        </div>
-      </div>
-    </section>
-    
-  </main>
-  
-  <!-- ===== FOOTER ===== -->
-  <footer>
-    <div class="container">
-      <div class="footer-inner">
-        <div>
-          <div class="footer-brand">🗺️ Data Annotator — Map Labeler</div>
-          <div class="footer-tagline">Accurate maps • Clear QC • Growth opportunities</div>
-        </div>
-        <div class="footer-copy">© 2016 • Training & Process Guide</div>
-      </div>
+
+  </section>
+
+
+  <!-- SOFTWARE -->
+
+  <section class="container section">
+
+    <div class="section-header">
+
+      <div class="section-label">Required software</div>
+
+      <h2>
+        Download Ginger
+      </h2>
+
+      <p>
+        Ginger is used for annotation tasks, corrections, and the quality
+        control workflow.
+      </p>
+
     </div>
-  </footer>
-  
-  <!-- ===== JAVASCRIPT ===== -->
-  <script>
-    (function() {
-      // Page navigation
-      const pages = ['home', 'introduction', 'requirements', 'software', 'apply', 'payment', 'guide', 'faq'];
-      const pageElements = {};
-      pages.forEach(p => pageElements[p] = document.getElementById(p + '-page'));
-      
-      const navLinks = document.querySelectorAll('.nav-link[data-page]');
-      
-      function setActivePage(page) {
-        if (!pageElements[page]) page = 'home';
-        
-        // Update page visibility
-        pages.forEach(p => {
-          if (pageElements[p]) {
-            pageElements[p].classList.toggle('active', p === page);
-          }
-        });
-        
-        // Update nav links
-        navLinks.forEach(link => {
-          link.classList.toggle('active', link.dataset.page === page);
-        });
-        
-        // Scroll to top
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        
-        // Close menus
-        closeMobileNav();
-        closeDropdown();
-      }
-      
-      // Nav link clicks
-      navLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-          e.preventDefault();
-          const page = this.dataset.page;
-          if (page) {
-            setActivePage(page);
-            history.replaceState(null, '', '#' + page);
-          }
-        });
-      });
-      
-      // Mobile menu
-      const mobileBtn = document.getElementById('mobileBtn');
-      const mobileNav = document.getElementById('mobileNav');
-      
-      function closeMobileNav() {
-        if (mobileNav) mobileNav.classList.remove('open');
-        if (mobileBtn) mobileBtn.setAttribute('aria-expanded', 'false');
-      }
-      
-      if (mobileBtn && mobileNav) {
-        mobileBtn.addEventListener('click', function() {
-          const isOpen = mobileNav.classList.toggle('open');
-          this.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-        });
-      }
-      
-      // Desktop dropdown
-      const moreBtn = document.getElementById('moreBtn');
-      const moreMenu = document.getElementById('moreMenu');
-      
-      function closeDropdown() {
-        if (moreMenu) moreMenu.classList.remove('open');
-        if (moreBtn) moreBtn.setAttribute('aria-expanded', 'false');
-      }
-      
-      if (moreBtn && moreMenu) {
-        moreBtn.addEventListener('click', function(e) {
-          e.preventDefault();
-          e.stopPropagation();
-          const isOpen = moreMenu.classList.toggle('open');
-          this.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-        });
-        
-        // Close on outside click
-        document.addEventListener('click', function(e) {
-          if (!moreMenu.contains(e.target) && !moreBtn.contains(e.target)) {
-            closeDropdown();
-          }
-        });
-      }
-      
-      // Close on escape
-      document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-          closeDropdown();
-          closeMobileNav();
-        }
-      });
-      
-      // Handle hash on load
-      function getPageFromHash() {
-        const hash = window.location.hash.substring(1).toLowerCase();
-        return pages.includes(hash) ? hash : 'home';
-      }
-      
-      // Initial page
-      setActivePage(getPageFromHash());
-      
-      // Hash change
-      window.addEventListener('hashchange', function() {
-        setActivePage(getPageFromHash());
-      });
-    })();
-  </script>
+
+    <div class="grid grid-2">
+
+      <div class="card">
+
+        <div class="card-icon">📦</div>
+
+        <h3>Ginger Software</h3>
+
+        <ul class="check-list">
+          <li>Windows 10/11 64-bit</li>
+          <li>8GB+ RAM recommended</li>
+          <li>Stable internet connection</li>
+        </ul>
+
+        <div class="hero-actions">
+
+          <a
+            class="btn btn-primary"
+            target="_blank"
+            rel="noopener"
+            href="https://drive.google.com/file/d/1rCLMWqjyulaYIdLsD8zmwhfPolxzFcPE/view"
+          >
+            Download Ginger
+          </a>
+
+          <a
+            class="btn"
+            style="background:#e0f2fe;color:#075985"
+            target="_blank"
+            rel="noopener"
+            href="https://drive.google.com/file/d/1eMZvGmU0SwCvntl3RBEOu9h40EAen6j2/view"
+          >
+            How to Extract
+          </a>
+
+        </div>
+
+      </div>
+
+      <div class="card">
+
+        <div class="card-icon">🛠️</div>
+
+        <h3>Installation tips</h3>
+
+        <ul class="check-list">
+          <li>Extract the software correctly</li>
+          <li>Follow the installation instructions</li>
+          <li>Check Windows security prompts if needed</li>
+          <li>Use the assigned UID and password when provided</li>
+        </ul>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- QC WORKFLOW -->
+
+  <section class="container section">
+
+    <div class="section-header">
+
+      <div class="section-label">Quality control</div>
+
+      <h2>
+        How your work is reviewed
+      </h2>
+
+      <p>
+        Quality control is part of the normal workflow. Feedback helps you
+        understand the standards and improve your work.
+      </p>
+
+    </div>
+
+    <div class="grid grid-4">
+
+      <div class="step">
+
+        <div class="step-number">1</div>
+
+        <h3>Labeling</h3>
+
+        <p>
+          Complete the assigned annotation task.
+        </p>
+
+      </div>
+
+      <div class="step">
+
+        <div class="step-number">2</div>
+
+        <h3>Checking</h3>
+
+        <p>
+          A checker reviews your work for quality and accuracy.
+        </p>
+
+      </div>
+
+      <div class="step">
+
+        <div class="step-number">3</div>
+
+        <h3>Judging</h3>
+
+        <p>
+          More complex cases may receive additional review.
+        </p>
+
+      </div>
+
+      <div class="step">
+
+        <div class="step-number">4</div>
+
+        <h3>Reviewing</h3>
+
+        <p>
+          The task completes the review workflow.
+        </p>
+
+      </div>
+
+    </div>
+
+    <div class="warning-box" style="margin-top:20px">
+
+      <strong>Pushback is part of learning.</strong>
+      When work is returned for correction, carefully read the feedback and
+      use it to avoid repeating the same mistake.
+
+    </div>
+
+  </section>
+
+
+  <!-- EARNINGS -->
+
+  <section id="earnings" class="container section">
+
+    <div class="section-header">
+
+      <div class="section-label">Payment information</div>
+
+      <h2>
+        How earnings work
+      </h2>
+
+      <p>
+        Rates and benchmarks may vary depending on the project, task type,
+        speed, quality, and current project rules.
+      </p>
+
+    </div>
+
+    <div class="earnings-highlight">
+
+      <div class="earning-box">
+
+        <div class="earning-value">
+          ₱75/hour
+        </div>
+
+        <div class="earning-label">
+          Standard rate example
+        </div>
+
+      </div>
+
+      <div class="earning-box">
+
+        <div class="earning-value">
+          ₱145/hour
+        </div>
+
+        <div class="earning-label">
+          Example rate for some project benchmarks
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="info-box" style="margin-top:20px">
+
+      <strong>Important:</strong>
+      These are examples based on the information provided for the current
+      project. Actual rates, benchmarks, and payment rules may change.
+
+    </div>
+
+    <div style="margin-top:20px">
+
+      <details>
+
+        <summary>
+          View detailed Building Repair benchmark
+        </summary>
+
+        <div class="details-content">
+
+          <div class="table-wrap">
+
+            <table>
+
+              <thead>
+
+                <tr>
+                  <th>Project</th>
+                  <th>Task</th>
+                  <th>Features/Layers</th>
+                  <th>Example Rate</th>
+                </tr>
+
+              </thead>
+
+              <tbody>
+
+                <tr>
+                  <td>Building Repair</td>
+                  <td>—</td>
+                  <td>800</td>
+                  <td>₱75/hour</td>
+                </tr>
+
+                <tr>
+                  <td>Filter</td>
+                  <td>240</td>
+                  <td>—</td>
+                  <td>₱75/hour</td>
+                </tr>
+
+                <tr>
+                  <td>3D Matching</td>
+                  <td>—</td>
+                  <td>60</td>
+                  <td>₱75/hour</td>
+                </tr>
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+        </div>
+
+      </details>
+
+
+      <details>
+
+        <summary>
+          View detailed Landcover benchmark
+        </summary>
+
+        <div class="details-content">
+
+          <div class="table-wrap">
+
+            <table>
+
+              <thead>
+
+                <tr>
+                  <th>Density</th>
+                  <th>Average Speed</th>
+                  <th>Example Task Target</th>
+                  <th>Example Rate</th>
+                </tr>
+
+              </thead>
+
+              <tbody>
+
+                <tr>
+                  <td>1–5</td>
+                  <td>60 seconds</td>
+                  <td>160 bldgs/hr</td>
+                  <td>₱145/hour</td>
+                </tr>
+
+                <tr>
+                  <td>6–10</td>
+                  <td>90 seconds</td>
+                  <td>290 bldgs/hr</td>
+                  <td>₱145/hour</td>
+                </tr>
+
+                <tr>
+                  <td>11–50</td>
+                  <td>180 seconds</td>
+                  <td>300 bldgs/hr</td>
+                  <td>₱145/hour</td>
+                </tr>
+
+                <tr>
+                  <td>51–100</td>
+                  <td>600 seconds</td>
+                  <td>400 bldgs/hr</td>
+                  <td>₱145/hour</td>
+                </tr>
+
+                <tr>
+                  <td>101–300</td>
+                  <td>1200 seconds</td>
+                  <td>600 bldgs/hr</td>
+                  <td>₱145/hour</td>
+                </tr>
+
+                <tr>
+                  <td>300+</td>
+                  <td>1200 seconds</td>
+                  <td>1000 bldgs/hr</td>
+                  <td>₱145/hour</td>
+                </tr>
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+        </div>
+
+      </details>
+
+    </div>
+
+  </section>
+
+
+  <!-- APPLY -->
+
+  <section id="apply" class="container section apply-section">
+
+    <div class="section-header">
+
+      <div class="section-label" style="color:#67e8f9">
+        Ready to begin?
+      </div>
+
+      <h2>
+        Apply in 2 simple steps
+      </h2>
+
+      <p>
+        Message the recruiter first, then complete the registration sheet.
+      </p>
+
+    </div>
+
+    <div class="grid grid-2">
+
+      <div class="apply-step">
+
+        <h3>
+          ① Message the recruiter
+        </h3>
+
+        <p>
+          Send a message so you can receive assistance and onboarding
+          information.
+        </p>
+
+        <a
+          class="apply-link"
+          target="_blank"
+          rel="noopener"
+          href="https://www.facebook.com/profile.php?id=61590782337797"
+        >
+
+          <span>
+            💬 Message on Facebook
+          </span>
+
+          <span>
+            →
+          </span>
+
+        </a>
+
+      </div>
+
+
+      <div class="apply-step">
+
+        <h3>
+          ② Complete the registration sheet
+        </h3>
+
+        <p>
+          Fill out your details using the recruiter name shown below.
+        </p>
+
+        <div class="recruiter">
+
+          <div class="recruiter-label">
+            Recruiter Name
+          </div>
+
+          <div class="recruiter-name">
+            RENZ IVAN OCANG
+          </div>
+
+        </div>
+
+        <a
+          class="apply-link"
+          target="_blank"
+          rel="noopener"
+          href="https://docs.google.com/spreadsheets/d/146LahgMlmhxtmnYIllnhjkLqanjWAzZ75ToZdm2WrqY/edit?gid=0#gid=0"
+        >
+
+          <span>
+            🧾 Open Registration Sheet
+          </span>
+
+          <span>
+            →
+          </span>
+
+        </a>
+
+      </div>
+
+    </div>
+
+    <div class="warning-box" style="margin-top:20px">
+
+      <strong>Safety reminder:</strong>
+      Never share your password, OTP, banking password, or other highly
+      sensitive security information with anyone.
+
+    </div>
+
+  </section>
+
+
+  <!-- PROMOTION -->
+
+  <section class="container section">
+
+    <div class="section-header">
+
+      <div class="section-label">Growth opportunity</div>
+
+      <h2>
+        Improve your skills and grow
+      </h2>
+
+      <p>
+        Consistent quality, reliability, communication, and accountability
+        can create opportunities for higher-level responsibilities.
+      </p>
+
+    </div>
+
+    <div class="grid grid-3">
+
+      <div class="card">
+
+        <div class="card-icon">📈</div>
+
+        <h3>Improve accuracy</h3>
+
+        <p>
+          Learn from feedback and reduce repeated mistakes.
+        </p>
+
+      </div>
+
+      <div class="card">
+
+        <div class="card-icon">🧠</div>
+
+        <h3>Build experience</h3>
+
+        <p>
+          Understand project standards and become more confident with the
+          tools.
+        </p>
+
+      </div>
+
+      <div class="card">
+
+        <div class="card-icon">🏅</div>
+
+        <h3>Take on more responsibility</h3>
+
+        <p>
+          Strong performers may become eligible for additional quality
+          responsibilities depending on project needs.
+        </p>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- FAQ -->
+
+  <section id="faq" class="container section">
+
+    <div class="section-header">
+
+      <div class="section-label">Frequently asked questions</div>
+
+      <h2>
+        Common questions
+      </h2>
+
+      <p>
+        Here are answers to the questions new applicants commonly have.
+      </p>
+
+    </div>
+
+    <div class="faq">
+
+      <details>
+
+        <summary>
+          Do I need previous experience?
+        </summary>
+
+        <div class="details-content">
+
+          Training materials and exams are provided for the mapping workflow.
+          You still need to learn the project rules and complete the required
+          training tasks.
+
+        </div>
+
+      </details>
+
+      <details>
+
+        <summary>
+          Is this work from home?
+        </summary>
+
+        <div class="details-content">
+
+          The work is performed using a computer and the required software.
+          Follow the current project instructions for the exact working
+          arrangement and requirements.
+
+        </div>
+
+      </details>
+
+      <details>
+
+        <summary>
+          How much can I earn?
+        </summary>
+
+        <div class="details-content">
+
+          Earnings depend on the project, rate structure, benchmark,
+          performance, speed, quality, and current project rules. The rates
+          shown on this website are examples and should not be treated as a
+          guaranteed income.
+
+        </div>
+
+      </details>
+
+      <details>
+
+        <summary>
+          What happens after I apply?
+        </summary>
+
+        <div class="details-content">
+
+          You should message the recruiter, complete the registration process,
+          receive the appropriate guidance, complete training, and work
+          through the required exams before production.
+
+        </div>
+
+      </details>
+
+      <details>
+
+        <summary>
+          What is a pushback?
+        </summary>
+
+        <div class="details-content">
+
+          A pushback means work has been returned for correction or additional
+          review. Use the feedback to understand the issue and improve future
+          submissions.
+
+        </div>
+
+      </details>
+
+      <details>
+
+        <summary>
+          What should I never share?
+        </summary>
+
+        <div class="details-content">
+
+          Never share your passwords, OTPs, banking passwords, or other
+          sensitive security credentials.
+
+        </div>
+
+      </details>
+
+    </div>
+
+  </section>
+
+
+  <!-- TRUST -->
+
+  <section class="container section">
+
+    <div class="section-header">
+
+      <div class="section-label">Before you apply</div>
+
+      <h2>
+        Important information
+      </h2>
+
+    </div>
+
+    <div class="grid grid-2">
+
+      <div class="card trust-card">
+
+        <h3>
+          📌 Verify instructions
+        </h3>
+
+        <p>
+          Project requirements, rates, training processes, and task
+          instructions can change. Always follow the latest official
+          instructions provided to you.
+        </p>
+
+      </div>
+
+      <div class="card trust-card">
+
+        <h3>
+          🔐 Protect your account
+        </h3>
+
+        <p>
+          Keep your passwords and one-time codes private. Legitimate
+          assistance should not require you to reveal sensitive security
+          credentials.
+        </p>
+
+      </div>
+
+    </div>
+
+  </section>
+
+</main>
+
+
+<!-- STICKY APPLY BUTTON -->
+
+<a href="#apply" class="sticky-apply">
+  🚀 Apply Now
+</a>
+
+
+<footer>
+
+  <div class="container">
+
+    <div class="footer-grid">
+
+      <div>
+
+        <h3>🗺️ RGC Map Labeler</h3>
+
+        <p>
+          A guide for applicants interested in map labeling and data
+          annotation work.
+        </p>
+
+      </div>
+
+      <div>
+
+        <h3>Quick Links</h3>
+
+        <ul>
+
+          <li>
+            <a href="#start">Start Here</a>
+          </li>
+
+          <li>
+            <a href="#requirements">Requirements</a>
+          </li>
+
+          <li>
+            <a href="#training">Training</a>
+          </li>
+
+          <li>
+            <a href="#apply">Apply Now</a>
+          </li>
+
+        </ul>
+
+      </div>
+
+      <div>
+
+        <h3>Resources</h3>
+
+        <ul>
+
+          <li>
+            <a href="#earnings">Earnings</a>
+          </li>
+
+          <li>
+            <a href="#faq">FAQ</a>
+          </li>
+
+          <li>
+            <a href="#requirements">Computer Requirements</a>
+          </li>
+
+        </ul>
+
+      </div>
+
+    </div>
+
+    <div class="footer-bottom">
+
+      Information on this website may change depending on current project
+      requirements and instructions. Always follow the latest instructions
+      provided by the appropriate project team.
+
+    </div>
+
+  </div>
+
+</footer>
+
+
+<script>
+
+const mobileToggle = document.getElementById("mobileToggle");
+const navLinks = document.getElementById("navLinks");
+
+mobileToggle.addEventListener("click", () => {
+
+  const isOpen = navLinks.classList.toggle("open");
+
+  mobileToggle.setAttribute(
+    "aria-expanded",
+    isOpen ? "true" : "false"
+  );
+
+});
+
+document.querySelectorAll(".nav-links a").forEach(link => {
+
+  link.addEventListener("click", () => {
+
+    navLinks.classList.remove("open");
+
+    mobileToggle.setAttribute(
+      "aria-expanded",
+      "false"
+    );
+
+  });
+
+});
+
+</script>
+
 </body>
 </html>
