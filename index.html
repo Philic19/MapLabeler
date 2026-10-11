@@ -10,52 +10,43 @@
 >
 <style>
 :root {
-  --navy: #0b1c55;
-  --blue: #2563eb;
-  --cyan: #06b6d4;
-  --green: #10b981;
-  --yellow: #f59e0b;
-  --red: #ef4444;
-  --bg: #f0f4fa;
+  --navy: #0a1628;
+  --navy-mid: #12263f;
+  --blue: #1d4ed8;
+  --cyan: #0ea5e9;
+  --green: #059669;
+  --yellow: #d97706;
+  --red: #dc2626;
+  --bg: #f1f5f9;
   --white: #ffffff;
-  --text: #172033;
+  --text: #0f172a;
   --muted: #64748b;
   --border: #e2e8f0;
   --soft: #f8fafc;
-  --shadow-sm: 0 8px 24px rgba(15, 23, 42, .06);
-  --shadow-md: 0 16px 40px rgba(15, 23, 42, .10);
-  --shadow-lg: 0 28px 70px rgba(15, 23, 42, .14);
-  --radius: 22px;
-  --max: 1180px;
+  --shadow-sm: 0 4px 16px rgba(15, 23, 42, .05);
+  --shadow-md: 0 12px 36px rgba(15, 23, 42, .08);
+  --shadow-lg: 0 24px 56px rgba(15, 23, 42, .12);
+  --radius: 16px;
+  --max: 1120px;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
-* {
-  box-sizing: border-box;
-}
-html {
-  scroll-behavior: smooth;
-}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
 body {
   margin: 0;
-  font-family:
-    Inter,
-    ui-sans-serif,
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    sans-serif;
+  font-family: "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   color: var(--text);
   background: var(--bg);
-  line-height: 1.6;
+  line-height: 1.65;
   overflow-x: hidden;
+  position: relative;
 }
-a {
-  color: inherit;
-}
+a { color: inherit; }
 .container {
-  width: min(var(--max), calc(100% - 32px));
+  width: min(var(--max), calc(100% - 40px));
   margin: auto;
+  position: relative;
+  z-index: 2;
 }
 .skip-link {
   position: fixed;
@@ -65,11 +56,82 @@ a {
   background: var(--navy);
   color: white;
   padding: 12px 16px;
-  border-radius: 10px;
+  border-radius: 8px;
   z-index: 9999;
 }
-.skip-link:focus {
-  transform: translateY(0);
+.skip-link:focus { transform: translateY(0); }
+
+/* =========================
+   ANIMATED MAP BACKGROUND
+========================= */
+.map-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  background: linear-gradient(165deg, #0a1628 0%, #0f1f36 40%, #12263f 100%);
+}
+.map-bg svg {
+  position: absolute;
+  width: 160%;
+  height: 160%;
+  top: -20%;
+  left: -25%;
+  opacity: 0.55;
+}
+.map-line {
+  fill: none;
+  stroke: rgba(14, 165, 233, 0.35);
+  stroke-width: 1.2;
+  stroke-linecap: round;
+  stroke-dasharray: 8 14;
+  animation: roadFlow 28s linear infinite;
+}
+.map-line.secondary {
+  stroke: rgba(148, 163, 184, 0.25);
+  stroke-width: 0.9;
+  stroke-dasharray: 4 10;
+  animation-duration: 36s;
+  animation-direction: reverse;
+}
+.map-line.accent {
+  stroke: rgba(5, 150, 105, 0.3);
+  stroke-width: 1.4;
+  stroke-dasharray: 12 18;
+  animation-duration: 22s;
+}
+.map-block {
+  fill: rgba(30, 58, 138, 0.12);
+  stroke: rgba(96, 165, 250, 0.2);
+  stroke-width: 0.8;
+  animation: blockPulse 8s ease-in-out infinite;
+}
+.map-dot {
+  fill: rgba(14, 165, 233, 0.7);
+  animation: dotPulse 3.5s ease-in-out infinite;
+}
+.map-dot.green { fill: rgba(5, 150, 105, 0.65); animation-delay: 1.2s; }
+.map-dot.amber { fill: rgba(217, 119, 6, 0.6); animation-delay: 2.1s; }
+@keyframes roadFlow {
+  to { stroke-dashoffset: -400; }
+}
+@keyframes blockPulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 0.9; }
+}
+@keyframes dotPulse {
+  0%, 100% { opacity: 0.4; r: 2.5; }
+  50% { opacity: 1; r: 4; }
+}
+.map-overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 70% 20%, rgba(14,165,233,.08), transparent 50%),
+    radial-gradient(ellipse 60% 50% at 20% 80%, rgba(5,150,105,.06), transparent 45%),
+    linear-gradient(180deg, transparent 0%, rgba(10,22,40,.35) 100%);
+  pointer-events: none;
 }
 
 /* =========================
@@ -79,15 +141,14 @@ header {
   position: sticky;
   top: 0;
   z-index: 1000;
-  background: rgba(11, 28, 85, .92);
-  backdrop-filter: blur(20px) saturate(160%);
-  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  background: rgba(10, 22, 40, 0.88);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
   color: white;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, .18);
-  transition: background .3s var(--ease);
+  border-bottom: 1px solid rgba(255,255,255,.06);
 }
 .navbar {
-  min-height: 72px;
+  min-height: 68px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -100,113 +161,85 @@ header {
   text-decoration: none;
 }
 .logo {
-  width: 46px;
-  height: 46px;
+  width: 42px;
+  height: 42px;
   display: grid;
   place-items: center;
-  border-radius: 14px;
-  background: linear-gradient(135deg, var(--cyan), var(--blue));
-  font-size: 23px;
-  box-shadow: 0 8px 20px rgba(6, 182, 212, .35);
-  transition: transform .4s var(--ease);
-}
-.brand:hover .logo {
-  transform: rotateY(18deg) scale(1.06);
+  border-radius: 11px;
+  background: linear-gradient(145deg, #0ea5e9, #1d4ed8);
+  font-size: 20px;
+  box-shadow: 0 4px 14px rgba(14, 165, 233, .3);
 }
 .brand-title {
-  font-size: 1.05rem;
-  font-weight: 900;
-  line-height: 1.1;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 .brand-subtitle {
-  font-size: .78rem;
-  opacity: .75;
+  font-size: .72rem;
+  opacity: .6;
+  font-weight: 500;
+  letter-spacing: 0.02em;
 }
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
 }
 .nav-links a {
-  padding: 10px 12px;
-  color: rgba(255,255,255,.9);
+  padding: 8px 12px;
+  color: rgba(255,255,255,.78);
   text-decoration: none;
-  border-radius: 10px;
-  font-weight: 750;
-  font-size: .9rem;
-  transition: background .25s var(--ease), transform .25s var(--ease);
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: .875rem;
+  transition: color .2s, background .2s;
 }
 .nav-links a:hover {
-  background: rgba(255,255,255,.12);
-  transform: translateY(-1px);
+  color: white;
+  background: rgba(255,255,255,.08);
 }
 .nav-apply {
   background: var(--green) !important;
   color: white !important;
-  padding: 11px 17px !important;
-  box-shadow: 0 8px 22px rgba(16, 185, 129, .35);
+  padding: 9px 16px !important;
+  margin-left: 6px;
+  box-shadow: 0 4px 14px rgba(5, 150, 105, .3);
 }
 .nav-apply:hover {
-  transform: translateY(-2px) !important;
-  box-shadow: 0 12px 28px rgba(16, 185, 129, .45) !important;
+  background: #047857 !important;
 }
 .mobile-toggle {
   display: none;
-  border: 1px solid rgba(255,255,255,.25);
-  background: rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.2);
+  background: rgba(255,255,255,.06);
   color: white;
-  border-radius: 10px;
-  padding: 10px 13px;
-  font-size: 1.1rem;
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-size: 1.05rem;
   cursor: pointer;
 }
 
 /* =========================
-   HERO
+   MAIN & HERO
 ========================= */
 main {
-  padding: 32px 0 70px;
+  padding: 28px 0 64px;
+  position: relative;
+  z-index: 1;
 }
 .hero {
   position: relative;
   overflow: hidden;
-  background:
-    radial-gradient(circle at 90% 10%, rgba(6,182,212,.28), transparent 32%),
-    radial-gradient(circle at 10% 80%, rgba(37,99,235,.18), transparent 40%),
-    linear-gradient(135deg, #0b1c55 0%, #123b91 55%, #0e2a6b 100%);
+  background: linear-gradient(145deg, rgba(10,22,40,.92) 0%, rgba(18,38,63,.88) 100%);
   color: white;
-  border-radius: 30px;
-  padding: 64px 52px;
+  border-radius: 20px;
+  padding: 56px 48px;
   box-shadow: var(--shadow-lg);
-  transform-style: preserve-3d;
-  perspective: 1200px;
-}
-.hero::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(circle at 70% 30%, rgba(255,255,255,.06) 0%, transparent 50%),
-    linear-gradient(180deg, transparent 60%, rgba(0,0,0,.12));
-  pointer-events: none;
-}
-.hero::after {
-  content: "⌁";
-  position: absolute;
-  right: 40px;
-  bottom: -70px;
-  font-size: 280px;
-  opacity: .06;
-  font-weight: 900;
-  animation: floatY 8s ease-in-out infinite;
-  transform: rotate(-12deg);
-}
-@keyframes floatY {
-  0%, 100% { transform: translateY(0) rotate(-12deg); }
-  50% { transform: translateY(-18px) rotate(-8deg); }
+  border: 1px solid rgba(255,255,255,.06);
 }
 .hero-content {
-  max-width: 760px;
+  max-width: 680px;
   position: relative;
   z-index: 1;
 }
@@ -214,663 +247,514 @@ main {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 14px;
+  padding: 6px 12px;
   border-radius: 999px;
-  background: rgba(255,255,255,.12);
-  border: 1px solid rgba(255,255,255,.2);
-  font-weight: 800;
-  font-size: .85rem;
-  margin-bottom: 18px;
-  backdrop-filter: blur(8px);
-  animation: fadeUp .7s var(--ease) both;
+  background: rgba(14, 165, 233, .12);
+  border: 1px solid rgba(14, 165, 233, .25);
+  font-weight: 600;
+  font-size: .8rem;
+  letter-spacing: 0.03em;
+  margin-bottom: 16px;
+  color: #7dd3fc;
 }
 .hero h1 {
-  margin: 0 0 18px;
-  font-size: clamp(2.2rem, 5vw, 4.1rem);
-  line-height: 1.05;
-  letter-spacing: -.04em;
-  animation: fadeUp .8s var(--ease) .08s both;
+  margin: 0 0 16px;
+  font-size: clamp(2rem, 4.5vw, 3.4rem);
+  line-height: 1.12;
+  letter-spacing: -.035em;
+  font-weight: 800;
 }
 .hero p {
   margin: 0;
-  max-width: 680px;
-  color: rgba(255,255,255,.84);
-  font-size: 1.08rem;
-  animation: fadeUp .8s var(--ease) .16s both;
+  max-width: 560px;
+  color: rgba(255,255,255,.72);
+  font-size: 1.05rem;
+  font-weight: 400;
 }
 .hero-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 10px;
   margin-top: 28px;
-  animation: fadeUp .8s var(--ease) .24s both;
 }
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 9px;
-  padding: 13px 19px;
-  border-radius: 13px;
+  gap: 8px;
+  padding: 11px 18px;
+  border-radius: 10px;
   text-decoration: none;
   border: 0;
   cursor: pointer;
-  font-weight: 850;
-  transition: transform .3s var(--ease), box-shadow .3s var(--ease), background .25s;
+  font-weight: 650;
+  font-size: .925rem;
+  transition: transform .25s var(--ease), box-shadow .25s, background .2s;
 }
-.btn:hover {
-  transform: translateY(-3px);
-}
+.btn:hover { transform: translateY(-2px); }
 .btn-primary {
   background: var(--green);
   color: white;
-  box-shadow: 0 12px 28px rgba(16,185,129,.32);
+  box-shadow: 0 6px 20px rgba(5, 150, 105, .28);
 }
 .btn-primary:hover {
-  box-shadow: 0 18px 36px rgba(16,185,129,.42);
+  background: #047857;
+  box-shadow: 0 10px 28px rgba(5, 150, 105, .35);
 }
 .btn-secondary {
   background: white;
   color: var(--navy);
-  box-shadow: 0 8px 22px rgba(0,0,0,.12);
+  box-shadow: 0 4px 14px rgba(0,0,0,.1);
 }
 .btn-outline {
-  background: rgba(255,255,255,.08);
+  background: transparent;
   color: white;
-  border: 1px solid rgba(255,255,255,.35);
-  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255,255,255,.28);
 }
 .btn-outline:hover {
-  background: rgba(255,255,255,.16);
+  background: rgba(255,255,255,.08);
+  border-color: rgba(255,255,255,.4);
 }
 .hero-highlights {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 28px;
-  animation: fadeUp .8s var(--ease) .32s both;
+  gap: 8px;
+  margin-top: 26px;
 }
 .highlight {
-  padding: 8px 13px;
+  padding: 6px 12px;
   border-radius: 999px;
-  background: rgba(255,255,255,.1);
-  border: 1px solid rgba(255,255,255,.16);
-  font-size: .88rem;
-  font-weight: 750;
-  backdrop-filter: blur(6px);
-  transition: transform .3s var(--ease), background .25s;
-}
-.highlight:hover {
-  transform: translateY(-2px) scale(1.03);
-  background: rgba(255,255,255,.16);
-}
-@keyframes fadeUp {
-  from {
-    opacity: 0;
-    transform: translateY(22px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.1);
+  font-size: .8rem;
+  font-weight: 550;
+  color: rgba(255,255,255,.85);
 }
 
 /* =========================
    SECTIONS
 ========================= */
 .section {
-  margin-top: 28px;
+  margin-top: 24px;
   background: var(--white);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 32px;
+  padding: 32px 28px;
   box-shadow: var(--shadow-sm);
-  transition: box-shadow .4s var(--ease), transform .4s var(--ease);
-}
-.section:hover {
-  box-shadow: var(--shadow-md);
 }
 .section-header {
-  max-width: 760px;
+  max-width: 640px;
   margin-bottom: 24px;
 }
 .section-label {
   color: var(--blue);
-  font-weight: 900;
-  font-size: .82rem;
-  letter-spacing: .08em;
+  font-weight: 700;
+  font-size: .75rem;
+  letter-spacing: .1em;
   text-transform: uppercase;
 }
 .section h2 {
-  margin: 5px 0 8px;
+  margin: 6px 0 8px;
   color: var(--navy);
-  font-size: clamp(1.65rem, 3vw, 2.25rem);
-  line-height: 1.15;
+  font-size: clamp(1.5rem, 2.8vw, 1.95rem);
+  line-height: 1.2;
+  font-weight: 750;
+  letter-spacing: -.02em;
 }
 .section h3 {
-  margin: 0 0 8px;
+  margin: 0 0 6px;
   color: var(--navy);
+  font-weight: 700;
+  font-size: 1.05rem;
 }
 .section p {
   color: var(--muted);
+  font-size: .95rem;
 }
 .grid {
   display: grid;
-  gap: 18px;
+  gap: 16px;
 }
-.grid-2 {
-  grid-template-columns: repeat(2, 1fr);
-}
-.grid-3 {
-  grid-template-columns: repeat(3, 1fr);
-}
-.grid-4 {
-  grid-template-columns: repeat(4, 1fr);
-}
+.grid-2 { grid-template-columns: repeat(2, 1fr); }
+.grid-3 { grid-template-columns: repeat(3, 1fr); }
+.grid-4 { grid-template-columns: repeat(4, 1fr); }
 
-/* 3D-style cards */
 .card {
-  padding: 22px;
-  border-radius: 18px;
+  padding: 20px;
+  border-radius: 12px;
   border: 1px solid var(--border);
   background: var(--soft);
-  transition: transform .45s var(--ease), box-shadow .45s var(--ease), border-color .3s;
-  transform-style: preserve-3d;
-  will-change: transform;
+  transition: box-shadow .3s var(--ease), border-color .25s, transform .3s var(--ease);
 }
 .card:hover {
-  transform: translateY(-8px) rotateX(4deg) scale(1.015);
-  box-shadow: 0 22px 48px rgba(15, 23, 42, .12);
-  border-color: #c7d2fe;
+  box-shadow: var(--shadow-md);
+  border-color: #cbd5e1;
+  transform: translateY(-3px);
 }
-.card h3,
-.card h4 {
+.card h3, .card h4 {
   margin-top: 0;
   color: var(--navy);
 }
-.card p {
-  margin-bottom: 0;
-}
+.card p { margin-bottom: 0; font-size: .9rem; }
 .card-icon {
-  width: 50px;
-  height: 50px;
+  width: 44px;
+  height: 44px;
   display: grid;
   place-items: center;
-  border-radius: 15px;
+  border-radius: 11px;
   background: linear-gradient(145deg, #e0f2fe, #dbeafe);
-  font-size: 1.4rem;
-  margin-bottom: 14px;
-  box-shadow: 0 6px 16px rgba(37, 99, 235, .12);
-  transition: transform .4s var(--ease);
-}
-.card:hover .card-icon {
-  transform: translateZ(20px) scale(1.08) rotateY(8deg);
+  font-size: 1.25rem;
+  margin-bottom: 12px;
 }
 .check-list {
   list-style: none;
   padding: 0;
-  margin: 14px 0 0;
+  margin: 12px 0 0;
 }
 .check-list li {
   position: relative;
-  padding-left: 28px;
-  margin: 9px 0;
+  padding-left: 24px;
+  margin: 7px 0;
   color: var(--muted);
+  font-size: .9rem;
 }
 .check-list li::before {
   content: "✓";
   position: absolute;
   left: 0;
   color: var(--green);
-  font-weight: 900;
+  font-weight: 700;
+  font-size: .85rem;
 }
 
-/* =========================
-   START HERE
-========================= */
+/* Start */
 .start-card {
-  background: linear-gradient(145deg, #eff6ff, #ecfeff);
-  border: 1px solid #bae6fd;
+  background: linear-gradient(160deg, #f0f9ff 0%, #ecfeff 100%);
+  border-color: #bae6fd;
 }
 .step {
-  position: relative;
-  padding: 22px;
-  border-radius: 18px;
+  padding: 20px;
+  border-radius: 12px;
   background: white;
   border: 1px solid var(--border);
-  transition: transform .4s var(--ease), box-shadow .4s var(--ease);
-  transform-style: preserve-3d;
+  transition: box-shadow .3s, transform .3s var(--ease);
 }
 .step:hover {
-  transform: translateY(-6px) rotateX(3deg);
-  box-shadow: 0 18px 40px rgba(15, 23, 42, .1);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-3px);
 }
 .step-number {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   display: grid;
   place-items: center;
-  border-radius: 13px;
+  border-radius: 10px;
   color: white;
-  font-weight: 900;
+  font-weight: 700;
+  font-size: .9rem;
   background: linear-gradient(135deg, var(--blue), var(--cyan));
-  margin-bottom: 14px;
-  box-shadow: 0 8px 18px rgba(37, 99, 235, .3);
-  transition: transform .4s var(--ease);
+  margin-bottom: 12px;
 }
-.step:hover .step-number {
-  transform: scale(1.1) rotateY(12deg);
-}
-.step h3 {
-  margin-bottom: 6px;
-}
+.step h3 { margin-bottom: 4px; font-size: 1rem; }
+.step p { font-size: .875rem; margin: 0; color: var(--muted); }
 
-/* =========================
-   REQUIREMENTS
-========================= */
-.requirement-card {
-  border-top: 4px solid var(--blue);
-}
-.requirement-card.recommended {
-  border-top-color: var(--green);
-}
-.requirement-card.warning {
-  border-top-color: var(--yellow);
-}
+/* Requirements */
+.requirement-card { border-top: 3px solid var(--blue); }
+.requirement-card.recommended { border-top-color: var(--green); }
+.requirement-card.warning { border-top-color: var(--yellow); }
 .requirement-card strong {
   display: block;
   color: var(--navy);
-  font-size: 1.15rem;
+  font-size: 1.05rem;
   margin-bottom: 6px;
 }
 .info-box {
-  padding: 18px 20px;
-  border-radius: 14px;
-  background: #eff6ff;
-  border-left: 5px solid var(--blue);
+  padding: 16px 18px;
+  border-radius: 10px;
+  background: #f0f9ff;
+  border-left: 4px solid var(--blue);
   color: var(--muted);
+  font-size: .9rem;
 }
 .warning-box {
-  padding: 18px 20px;
-  border-radius: 14px;
+  padding: 16px 18px;
+  border-radius: 10px;
   background: #fffbeb;
-  border-left: 5px solid var(--yellow);
-  color: #78350f;
+  border-left: 4px solid var(--yellow);
+  color: #92400e;
+  font-size: .9rem;
 }
 .success-box {
-  padding: 18px 20px;
-  border-radius: 14px;
+  padding: 16px 18px;
+  border-radius: 10px;
   background: #ecfdf5;
-  border-left: 5px solid var(--green);
+  border-left: 4px solid var(--green);
   color: #065f46;
+  font-size: .9rem;
 }
 
-/* =========================
-   TRAINING
-========================= */
+/* Training */
 .resource {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 15px;
-  padding: 16px;
+  gap: 14px;
+  padding: 14px 16px;
   border: 1px solid var(--border);
-  border-radius: 14px;
+  border-radius: 10px;
   background: white;
-  transition: transform .35s var(--ease), box-shadow .35s var(--ease), border-color .25s;
+  transition: box-shadow .25s, border-color .2s;
 }
 .resource:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 14px 32px rgba(15, 23, 42, .08);
+  box-shadow: var(--shadow-sm);
   border-color: #bfdbfe;
 }
 .resource-title {
-  font-weight: 850;
+  font-weight: 650;
   color: var(--navy);
+  font-size: .925rem;
 }
 .resource-subtitle {
   color: var(--muted);
-  font-size: .88rem;
+  font-size: .8rem;
 }
 .resource .btn {
   flex-shrink: 0;
-  padding: 9px 13px;
-  font-size: .86rem;
+  padding: 7px 12px;
+  font-size: .8rem;
 }
 
-/* =========================
-   EARNINGS
-========================= */
+/* Earnings */
 .earnings-highlight {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
+  gap: 14px;
 }
 .earning-box {
-  padding: 26px;
-  border-radius: 20px;
-  background: linear-gradient(145deg, #eff6ff, #ecfeff);
+  padding: 24px;
+  border-radius: 14px;
+  background: linear-gradient(160deg, #f0f9ff, #ecfeff);
   border: 1px solid #bae6fd;
-  transition: transform .4s var(--ease), box-shadow .4s var(--ease);
-  transform-style: preserve-3d;
-}
-.earning-box:hover {
-  transform: translateY(-6px) rotateX(3deg);
-  box-shadow: 0 20px 44px rgba(37, 99, 235, .12);
 }
 .earning-value {
-  font-size: 2.1rem;
-  font-weight: 950;
+  font-size: 1.85rem;
+  font-weight: 800;
   color: var(--navy);
   letter-spacing: -.02em;
 }
 .earning-label {
   color: var(--muted);
-  font-weight: 700;
+  font-weight: 550;
+  font-size: .875rem;
+  margin-top: 2px;
 }
 details {
   border: 1px solid var(--border);
-  border-radius: 14px;
+  border-radius: 10px;
   background: white;
   overflow: hidden;
-  transition: box-shadow .3s var(--ease);
 }
-details:hover {
-  box-shadow: 0 8px 24px rgba(15, 23, 42, .06);
-}
-details + details {
-  margin-top: 10px;
-}
+details + details { margin-top: 8px; }
 summary {
   cursor: pointer;
-  padding: 17px 20px;
-  font-weight: 850;
+  padding: 14px 18px;
+  font-weight: 650;
   color: var(--navy);
-  transition: background .25s;
+  font-size: .925rem;
+  transition: background .2s;
 }
-summary:hover {
-  background: var(--soft);
-}
+summary:hover { background: var(--soft); }
 .details-content {
-  padding: 0 20px 20px;
+  padding: 0 18px 16px;
   color: var(--muted);
+  font-size: .9rem;
 }
-.table-wrap {
-  overflow-x: auto;
-}
+.table-wrap { overflow-x: auto; }
 table {
   width: 100%;
-  min-width: 650px;
+  min-width: 600px;
   border-collapse: collapse;
+  font-size: .875rem;
 }
-th,
-td {
-  padding: 13px;
+th, td {
+  padding: 11px 12px;
   border-bottom: 1px solid var(--border);
   text-align: left;
 }
 th {
   background: var(--navy);
   color: white;
+  font-weight: 600;
 }
-tbody tr:nth-child(even) {
-  background: var(--soft);
-}
+tbody tr:nth-child(even) { background: var(--soft); }
 
-/* =========================
-   APPLY
-========================= */
+/* Apply */
 .apply-section {
-  background:
-    radial-gradient(circle at 85% 15%, rgba(6,182,212,.2), transparent 35%),
-    linear-gradient(135deg, #0b1c55, #123b91);
+  background: linear-gradient(150deg, #0a1628 0%, #12263f 100%);
   color: white;
-  overflow: hidden;
-  position: relative;
-}
-.apply-section::after {
-  content: "";
-  position: absolute;
-  width: 320px;
-  height: 320px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(6,182,212,.15), transparent 70%);
-  right: -80px;
-  bottom: -100px;
-  pointer-events: none;
-  animation: floatY 10s ease-in-out infinite reverse;
+  border: 1px solid rgba(255,255,255,.06);
 }
 .apply-section h2,
-.apply-section h3 {
-  color: white;
-}
-.apply-section p {
-  color: rgba(255,255,255,.75);
-}
+.apply-section h3 { color: white; }
+.apply-section p { color: rgba(255,255,255,.65); }
 .apply-step {
-  background: rgba(255,255,255,.08);
-  border: 1px solid rgba(255,255,255,.16);
-  border-radius: 20px;
-  padding: 26px;
-  backdrop-filter: blur(10px);
-  transition: transform .4s var(--ease), background .3s;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 14px;
+  padding: 22px;
+  transition: background .25s;
 }
-.apply-step:hover {
-  transform: translateY(-6px);
-  background: rgba(255,255,255,.12);
-}
-.apply-step h3 {
-  margin-bottom: 8px;
-}
+.apply-step:hover { background: rgba(255,255,255,.08); }
+.apply-step h3 { margin-bottom: 6px; font-size: 1.05rem; }
 .apply-link {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 14px;
-  margin-top: 18px;
-  padding: 16px;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 13px 16px;
   background: white;
   color: var(--navy);
-  border-radius: 14px;
+  border-radius: 10px;
   text-decoration: none;
-  font-weight: 850;
-  transition: transform .3s var(--ease), box-shadow .3s var(--ease);
-  box-shadow: 0 8px 24px rgba(0,0,0,.12);
+  font-weight: 650;
+  font-size: .925rem;
+  transition: transform .25s, box-shadow .25s;
+  box-shadow: 0 4px 14px rgba(0,0,0,.12);
 }
 .apply-link:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 14px 32px rgba(0,0,0,.18);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(0,0,0,.16);
 }
 .recruiter {
-  margin-top: 18px;
-  padding: 18px;
+  margin-top: 16px;
+  padding: 16px;
   text-align: center;
   background: white;
   color: var(--navy);
-  border-radius: 14px;
-  box-shadow: 0 8px 24px rgba(0,0,0,.1);
+  border-radius: 10px;
 }
 .recruiter-label {
   color: var(--muted);
-  font-size: .82rem;
-  font-weight: 800;
+  font-size: .72rem;
+  font-weight: 700;
   text-transform: uppercase;
+  letter-spacing: .06em;
 }
 .recruiter-name {
-  font-size: 1.4rem;
-  font-weight: 950;
+  font-size: 1.25rem;
+  font-weight: 800;
   color: var(--red);
-  margin-top: 5px;
+  margin-top: 4px;
 }
 
-/* =========================
-   FAQ
-========================= */
-.faq summary {
-  font-size: 1rem;
-}
-.faq p {
-  margin: 0;
-}
+/* Trust */
+.trust-card { border-left: 4px solid var(--green); }
 
-/* =========================
-   TRUST
-========================= */
-.trust-card {
-  border-left: 5px solid var(--green);
-}
-
-/* =========================
-   STICKY APPLY
-========================= */
+/* Sticky */
 .sticky-apply {
   position: fixed;
-  right: 22px;
-  bottom: 22px;
+  right: 20px;
+  bottom: 20px;
   z-index: 900;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 14px 22px;
+  gap: 7px;
+  padding: 12px 20px;
   border-radius: 999px;
   background: var(--green);
   color: white;
   text-decoration: none;
-  font-weight: 900;
-  box-shadow: 0 16px 40px rgba(16,185,129,.4);
-  transition: transform .35s var(--ease), box-shadow .35s var(--ease);
+  font-weight: 700;
+  font-size: .9rem;
+  box-shadow: 0 10px 28px rgba(5, 150, 105, .35);
+  transition: transform .25s, box-shadow .25s;
 }
 .sticky-apply:hover {
-  transform: translateY(-4px) scale(1.03);
-  box-shadow: 0 22px 48px rgba(16,185,129,.5);
+  transform: translateY(-3px);
+  box-shadow: 0 14px 34px rgba(5, 150, 105, .45);
 }
 
-/* =========================
-   FOOTER
-========================= */
+/* Footer */
 footer {
-  background: #07133d;
+  background: #060e1a;
   color: white;
-  padding: 44px 0;
+  padding: 40px 0;
+  position: relative;
+  z-index: 2;
 }
 .footer-grid {
   display: grid;
-  grid-template-columns: 1.4fr 1fr 1fr;
-  gap: 30px;
+  grid-template-columns: 1.5fr 1fr 1fr;
+  gap: 28px;
 }
 footer h3 {
   margin-top: 0;
+  font-size: 1rem;
+  font-weight: 700;
 }
-footer p,
-footer li {
-  color: rgba(255,255,255,.68);
+footer p, footer li {
+  color: rgba(255,255,255,.55);
+  font-size: .875rem;
 }
-footer ul {
-  list-style: none;
-  padding: 0;
-}
-footer li {
-  margin: 8px 0;
-}
+footer ul { list-style: none; padding: 0; }
+footer li { margin: 6px 0; }
 footer a {
-  color: rgba(255,255,255,.8);
+  color: rgba(255,255,255,.65);
   text-decoration: none;
-  transition: color .25s;
+  transition: color .2s;
 }
-footer a:hover {
-  color: white;
-}
+footer a:hover { color: white; }
 .footer-bottom {
-  margin-top: 30px;
-  padding-top: 20px;
-  border-top: 1px solid rgba(255,255,255,.12);
-  color: rgba(255,255,255,.5);
-  font-size: .88rem;
+  margin-top: 28px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255,255,255,.08);
+  color: rgba(255,255,255,.4);
+  font-size: .8rem;
 }
 
-/* =========================
-   SCROLL REVEAL
-========================= */
+/* Reveal */
 .reveal {
   opacity: 0;
-  transform: translateY(28px);
-  transition: opacity .7s var(--ease), transform .7s var(--ease);
+  transform: translateY(20px);
+  transition: opacity .6s var(--ease), transform .6s var(--ease);
 }
 .reveal.visible {
   opacity: 1;
   transform: translateY(0);
 }
 
-/* =========================
-   RESPONSIVE
-========================= */
+/* Responsive */
 @media (max-width: 900px) {
   .nav-links {
     display: none;
     position: absolute;
-    top: 72px;
+    top: 68px;
     left: 16px;
     right: 16px;
-    padding: 12px;
+    padding: 10px;
     background: var(--navy);
-    border-radius: 14px;
+    border-radius: 12px;
     box-shadow: var(--shadow-lg);
     flex-direction: column;
     align-items: stretch;
+    border: 1px solid rgba(255,255,255,.08);
   }
-  .nav-links.open {
-    display: flex;
-  }
-  .nav-links a {
-    display: block;
-  }
-  .mobile-toggle {
-    display: block;
-  }
-  .grid-3,
-  .grid-4 {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  .footer-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-  .card:hover,
-  .step:hover,
-  .earning-box:hover {
-    transform: translateY(-5px);
-  }
+  .nav-links.open { display: flex; }
+  .nav-links a { display: block; }
+  .mobile-toggle { display: block; }
+  .grid-3, .grid-4 { grid-template-columns: repeat(2, 1fr); }
+  .footer-grid { grid-template-columns: 1fr 1fr; }
 }
-@media (max-width: 650px) {
-  .container {
-    width: min(var(--max), calc(100% - 22px));
-  }
-  main {
-    padding-top: 16px;
-  }
-  .hero {
-    padding: 36px 24px;
-    border-radius: 24px;
-  }
-  .section {
-    padding: 22px 18px;
-    border-radius: 18px;
-  }
-  .grid-2,
-  .grid-3,
-  .grid-4,
-  .earnings-highlight {
-    grid-template-columns: 1fr;
-  }
-  .resource {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-  .resource .btn {
-    width: 100%;
-  }
-  .footer-grid {
-    grid-template-columns: 1fr;
-  }
+@media (max-width: 640px) {
+  .container { width: min(var(--max), calc(100% - 24px)); }
+  main { padding-top: 16px; }
+  .hero { padding: 32px 22px; border-radius: 16px; }
+  .section { padding: 22px 18px; border-radius: 14px; }
+  .grid-2, .grid-3, .grid-4, .earnings-highlight { grid-template-columns: 1fr; }
+  .resource { flex-direction: column; align-items: flex-start; }
+  .resource .btn { width: 100%; }
+  .footer-grid { grid-template-columns: 1fr; }
   .sticky-apply {
     right: 12px;
     bottom: 12px;
@@ -881,6 +765,73 @@ footer a:hover {
 </style>
 </head>
 <body>
+
+<!-- Animated map background -->
+<div class="map-bg" aria-hidden="true">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+    <!-- City blocks -->
+    <rect class="map-block" x="80" y="120" width="90" height="70" rx="2"/>
+    <rect class="map-block" x="190" y="100" width="110" height="90" rx="2" style="animation-delay:1s"/>
+    <rect class="map-block" x="320" y="140" width="70" height="55" rx="2" style="animation-delay:2s"/>
+    <rect class="map-block" x="420" y="90" width="130" height="80" rx="2" style="animation-delay:.5s"/>
+    <rect class="map-block" x="580" y="130" width="85" height="65" rx="2" style="animation-delay:1.5s"/>
+    <rect class="map-block" x="700" y="100" width="100" height="95" rx="2" style="animation-delay:2.5s"/>
+    <rect class="map-block" x="830" y="140" width="75" height="50" rx="2"/>
+    <rect class="map-block" x="940" y="110" width="120" height="85" rx="2" style="animation-delay:.8s"/>
+    <rect class="map-block" x="150" y="280" width="100" height="70" rx="2" style="animation-delay:1.2s"/>
+    <rect class="map-block" x="280" y="300" width="80" height="60" rx="2"/>
+    <rect class="map-block" x="400" y="270" width="140" height="90" rx="2" style="animation-delay:2s"/>
+    <rect class="map-block" x="580" y="290" width="90" height="70" rx="2" style="animation-delay:.3s"/>
+    <rect class="map-block" x="720" y="260" width="110" height="85" rx="2" style="animation-delay:1.8s"/>
+    <rect class="map-block" x="870" y="300" width="95" height="55" rx="2"/>
+    <rect class="map-block" x="100" y="450" width="120" height="75" rx="2" style="animation-delay:1s"/>
+    <rect class="map-block" x="250" y="470" width="85" height="60" rx="2" style="animation-delay:2.2s"/>
+    <rect class="map-block" x="380" y="440" width="100" height="80" rx="2"/>
+    <rect class="map-block" x="520" y="460" width="130" height="70" rx="2" style="animation-delay:.7s"/>
+    <rect class="map-block" x="690" y="440" width="90" height="90" rx="2" style="animation-delay:1.4s"/>
+    <rect class="map-block" x="820" y="470" width="110" height="55" rx="2"/>
+    <rect class="map-block" x="180" y="600" width="95" height="65" rx="2" style="animation-delay:2s"/>
+    <rect class="map-block" x="320" y="580" width="140" height="80" rx="2"/>
+    <rect class="map-block" x="500" y="610" width="80" height="55" rx="2" style="animation-delay:1s"/>
+    <rect class="map-block" x="640" y="590" width="120" height="75" rx="2" style="animation-delay:.5s"/>
+    <rect class="map-block" x="800" y="620" width="100" height="60" rx="2"/>
+
+    <!-- Primary roads -->
+    <path class="map-line" d="M0 200 H400 L480 280 H700 L780 220 H1200"/>
+    <path class="map-line" d="M0 400 H250 L320 480 H600 L680 400 H950 L1050 480 H1200"/>
+    <path class="map-line" d="M200 0 V300 L280 380 V550 L220 620 V800"/>
+    <path class="map-line" d="M550 0 V180 L620 250 V420 L550 500 V800"/>
+    <path class="map-line" d="M900 0 V220 L960 300 V500 L880 580 V800"/>
+
+    <!-- Secondary roads -->
+    <path class="map-line secondary" d="M0 100 H300 L360 160 H600"/>
+    <path class="map-line secondary" d="M0 550 H180 L240 620 H450 L520 560 H800"/>
+    <path class="map-line secondary" d="M100 0 V150 L50 220 V400"/>
+    <path class="map-line secondary" d="M750 0 V150 L820 230 V400 L780 480 V700"/>
+    <path class="map-line secondary" d="M1100 100 V300 L1040 380 V600"/>
+    <path class="map-line secondary" d="M0 700 H400 L480 640 H750 L820 700 H1200"/>
+
+    <!-- Accent routes -->
+    <path class="map-line accent" d="M50 350 H200 L280 280 H450 L520 350 H700 L780 280 H1100"/>
+    <path class="map-line accent" d="M400 50 V200 L480 280 V450 L420 520 V750"/>
+
+    <!-- Location dots -->
+    <circle class="map-dot" cx="220" cy="180" r="3"/>
+    <circle class="map-dot green" cx="480" cy="160" r="3"/>
+    <circle class="map-dot" cx="720" cy="200" r="3"/>
+    <circle class="map-dot amber" cx="350" cy="360" r="3"/>
+    <circle class="map-dot" cx="650" cy="340" r="3"/>
+    <circle class="map-dot green" cx="920" cy="280" r="3"/>
+    <circle class="map-dot" cx="180" cy="500" r="3"/>
+    <circle class="map-dot amber" cx="520" cy="520" r="3"/>
+    <circle class="map-dot" cx="780" cy="500" r="3"/>
+    <circle class="map-dot green" cx="400" cy="640" r="3"/>
+    <circle class="map-dot" cx="700" cy="650" r="3"/>
+    <circle class="map-dot amber" cx="980" cy="180" r="3"/>
+  </svg>
+  <div class="map-overlay"></div>
+</div>
+
 <a href="#main" class="skip-link">Skip to content</a>
 <header>
   <div class="container navbar">
@@ -891,52 +842,33 @@ footer a:hover {
         <div class="brand-subtitle">Training • Quality Control • Growth</div>
       </div>
     </a>
-    <button
-      class="mobile-toggle"
-      id="mobileToggle"
-      aria-label="Open navigation"
-      aria-expanded="false"
-    >
-      ☰
-    </button>
+    <button class="mobile-toggle" id="mobileToggle" aria-label="Open navigation" aria-expanded="false">☰</button>
     <nav class="nav-links" id="navLinks">
       <a href="#start">Start Here</a>
       <a href="#requirements">Requirements</a>
       <a href="#training">Training</a>
       <a href="#earnings">Earnings</a>
       <a href="#faq">FAQ</a>
-      <a class="nav-apply" href="#apply">
-        🚀 Apply Now
-      </a>
+      <a class="nav-apply" href="#apply">🚀 Apply Now</a>
     </nav>
   </div>
 </header>
+
 <main id="main">
-  <!-- HERO -->
   <section class="container">
     <div class="hero">
       <div class="hero-content">
-        <div class="eyebrow">
-          🧭 New applicant guide
-        </div>
-        <h1>
-          Earn by Helping Build Better Digital Maps
-        </h1>
+        <div class="eyebrow">🧭 New applicant guide</div>
+        <h1>Earn by Helping Build Better Digital Maps</h1>
         <p>
           Become a Map Labeler and Data Annotator. Learn how to work with
           satellite imagery, create accurate map data, complete training,
           pass the required exams, and begin production work.
         </p>
         <div class="hero-actions">
-          <a href="#start" class="btn btn-primary">
-            Start Here →
-          </a>
-          <a href="#requirements" class="btn btn-secondary">
-            Check Requirements
-          </a>
-          <a href="#apply" class="btn btn-outline">
-            Apply Now
-          </a>
+          <a href="#start" class="btn btn-primary">Start Here →</a>
+          <a href="#requirements" class="btn btn-secondary">Check Requirements</a>
+          <a href="#apply" class="btn btn-outline">Apply Now</a>
         </div>
         <div class="hero-highlights">
           <span class="highlight">🖥️ Windows 10/11 64-bit</span>
@@ -947,88 +879,58 @@ footer a:hover {
       </div>
     </div>
   </section>
-  <!-- START HERE -->
+
   <section id="start" class="container section start-card reveal">
     <div class="section-header">
       <div class="section-label">Start here</div>
-      <h2>
-        Your path from applicant to map labeler
-      </h2>
-      <p>
-        Follow these steps in order. This makes the process easier and helps
-        you understand what to do next.
-      </p>
+      <h2>Your path from applicant to map labeler</h2>
+      <p>Follow these steps in order. This makes the process easier and helps you understand what to do next.</p>
     </div>
     <div class="grid grid-3">
       <div class="step">
         <div class="step-number">1</div>
         <h3>Check your setup</h3>
-        <p>
-          Make sure your computer, operating system, RAM, and internet
-          connection meet the requirements.
-        </p>
+        <p>Make sure your computer, operating system, RAM, and internet connection meet the requirements.</p>
       </div>
       <div class="step">
         <div class="step-number">2</div>
         <h3>Learn the basics</h3>
-        <p>
-          Watch the training materials and understand the tools and mapping
-          standards before starting exams.
-        </p>
+        <p>Watch the training materials and understand the tools and mapping standards before starting exams.</p>
       </div>
       <div class="step">
         <div class="step-number">3</div>
         <h3>Install Ginger</h3>
-        <p>
-          Download the required annotation software and prepare your work
-          environment.
-        </p>
+        <p>Download the required annotation software and prepare your work environment.</p>
       </div>
       <div class="step">
         <div class="step-number">4</div>
         <h3>Complete exams</h3>
-        <p>
-          Complete the required training tasks for Building Repair,
-          Landcover, and Transportation.
-        </p>
+        <p>Complete the required training tasks for Building Repair, Landcover, and Transportation.</p>
       </div>
       <div class="step">
         <div class="step-number">5</div>
         <h3>Apply and get assisted</h3>
-        <p>
-          Message the recruiter and complete the registration sheet so you
-          can receive assistance and onboarding information.
-        </p>
+        <p>Message the recruiter and complete the registration sheet so you can receive assistance and onboarding information.</p>
       </div>
       <div class="step">
         <div class="step-number">6</div>
         <h3>Production and QC</h3>
-        <p>
-          Start working on tasks, receive quality feedback, fix pushbacks,
-          and improve your performance.
-        </p>
+        <p>Start working on tasks, receive quality feedback, fix pushbacks, and improve your performance.</p>
       </div>
     </div>
   </section>
-  <!-- WHAT YOU DO -->
+
   <section class="container section reveal">
     <div class="section-header">
       <div class="section-label">The work</div>
-      <h2>
-        What does a Map Labeler do?
-      </h2>
-      <p>
-        You interpret satellite imagery and convert visible features into
-        structured digital map data.
-      </p>
+      <h2>What does a Map Labeler do?</h2>
+      <p>You interpret satellite imagery and convert visible features into structured digital map data.</p>
     </div>
     <div class="grid grid-4">
       <div class="card">
         <div class="card-icon">🏢</div>
         <h3>Building Creation</h3>
-        <p>
-          Draw building footprints on imagery and create accurate shapes.
-        </p>
+        <p>Draw building footprints on imagery and create accurate shapes.</p>
         <ul class="check-list">
           <li>Trace building footprints</li>
           <li>Follow corners and curves</li>
@@ -1038,9 +940,7 @@ footer a:hover {
       <div class="card">
         <div class="card-icon">🛠️</div>
         <h3>Building Repair</h3>
-        <p>
-          Correct existing building shapes and fix inaccurate labels.
-        </p>
+        <p>Correct existing building shapes and fix inaccurate labels.</p>
         <ul class="check-list">
           <li>Fix shifted polygons</li>
           <li>Split or merge shapes</li>
@@ -1050,9 +950,7 @@ footer a:hover {
       <div class="card">
         <div class="card-icon">🛣️</div>
         <h3>Transportation</h3>
-        <p>
-          Create road centerlines and apply the required measurements.
-        </p>
+        <p>Create road centerlines and apply the required measurements.</p>
         <ul class="check-list">
           <li>Follow road curves</li>
           <li>Keep lines centered</li>
@@ -1062,9 +960,7 @@ footer a:hover {
       <div class="card">
         <div class="card-icon">🌿</div>
         <h3>Landcover</h3>
-        <p>
-          Classify land areas based on their visible characteristics.
-        </p>
+        <p>Classify land areas based on their visible characteristics.</p>
         <ul class="check-list">
           <li>Forest</li>
           <li>Water</li>
@@ -1073,17 +969,12 @@ footer a:hover {
       </div>
     </div>
   </section>
-  <!-- REQUIREMENTS -->
+
   <section id="requirements" class="container section reveal">
     <div class="section-header">
       <div class="section-label">Before applying</div>
-      <h2>
-        Check your requirements
-      </h2>
-      <p>
-        Make sure your computer and internet connection are ready before
-        beginning the training process.
-      </p>
+      <h2>Check your requirements</h2>
+      <p>Make sure your computer and internet connection are ready before beginning the training process.</p>
     </div>
     <div class="grid grid-3">
       <div class="card requirement-card">
@@ -1115,156 +1006,81 @@ footer a:hover {
         </ul>
       </div>
     </div>
-    <div class="info-box" style="margin-top:20px">
+    <div class="info-box" style="margin-top:18px">
       <strong>Important:</strong>
-      The exact software and project requirements may change depending on
-      the current project. Always follow the latest instructions provided
-      during training.
+      The exact software and project requirements may change depending on the current project. Always follow the latest instructions provided during training.
     </div>
   </section>
-  <!-- TRAINING -->
+
   <section id="training" class="container section reveal">
     <div class="section-header">
       <div class="section-label">Learn before production</div>
-      <h2>
-        Training and required exams
-      </h2>
-      <p>
-        Watch the training materials, understand the workflow, and complete
-        the required exams before production work.
-      </p>
+      <h2>Training and required exams</h2>
+      <p>Watch the training materials, understand the workflow, and complete the required exams before production work.</p>
     </div>
     <div class="grid grid-2">
       <div>
         <h3>📚 Training resources</h3>
-        <div style="display:grid;gap:10px;margin-top:15px">
+        <div style="display:grid;gap:8px;margin-top:14px">
           <div class="resource">
             <div>
-              <div class="resource-title">
-                🛠️ Basic Tools Video
-              </div>
-              <div class="resource-subtitle">
-                Learn the basic tools and interface
-              </div>
+              <div class="resource-title">🛠️ Basic Tools Video</div>
+              <div class="resource-subtitle">Learn the basic tools and interface</div>
             </div>
-            <a
-              class="btn btn-primary"
-              target="_blank"
-              rel="noopener"
-              href="https://drive.google.com/file/d/1HvLMhJKNapzOB0VgC0uJ4sWGxUzp9uHi/view"
-            >
-              Open
-            </a>
+            <a class="btn btn-primary" target="_blank" rel="noopener" href="https://drive.google.com/file/d/1HvLMhJKNapzOB0VgC0uJ4sWGxUzp9uHi/view">Open</a>
           </div>
           <div class="resource">
             <div>
-              <div class="resource-title">
-                📁 Standard Training Exam
-              </div>
-              <div class="resource-subtitle">
-                Training materials and tasks
-              </div>
+              <div class="resource-title">📁 Standard Training Exam</div>
+              <div class="resource-subtitle">Training materials and tasks</div>
             </div>
-            <a
-              class="btn btn-primary"
-              target="_blank"
-              rel="noopener"
-              href="https://drive.google.com/drive/folders/1-KnatBzY5D-371Imy6CFn5L7Cb5vhKHG"
-            >
-              Open
-            </a>
+            <a class="btn btn-primary" target="_blank" rel="noopener" href="https://drive.google.com/drive/folders/1-KnatBzY5D-371Imy6CFn5L7Cb5vhKHG">Open</a>
           </div>
           <div class="resource">
             <div>
-              <div class="resource-title">
-                🌿 Landcover Training Exam
-              </div>
-              <div class="resource-subtitle">
-                Learn landcover annotation
-              </div>
+              <div class="resource-title">🌿 Landcover Training Exam</div>
+              <div class="resource-subtitle">Learn landcover annotation</div>
             </div>
-            <a
-              class="btn btn-primary"
-              target="_blank"
-              rel="noopener"
-              href="https://youtu.be/xNHKSv2mV-g"
-            >
-              Open
-            </a>
+            <a class="btn btn-primary" target="_blank" rel="noopener" href="https://youtu.be/xNHKSv2mV-g">Open</a>
           </div>
           <div class="resource">
             <div>
-              <div class="resource-title">
-                🛣️ Transportation Guide
-              </div>
-              <div class="resource-subtitle">
-                Transportation mapping instructions
-              </div>
+              <div class="resource-title">🛣️ Transportation Guide</div>
+              <div class="resource-subtitle">Transportation mapping instructions</div>
             </div>
-            <a
-              class="btn btn-primary"
-              target="_blank"
-              rel="noopener"
-              href="https://docs.google.com/document/d/1oV1kJYEUaQZGAw_HSDltcl8GqsisXCabS8mcFsbkl_U/edit"
-            >
-              Open
-            </a>
+            <a class="btn btn-primary" target="_blank" rel="noopener" href="https://docs.google.com/document/d/1oV1kJYEUaQZGAw_HSDltcl8GqsisXCabS8mcFsbkl_U/edit">Open</a>
           </div>
           <div class="resource">
             <div>
-              <div class="resource-title">
-                🛣️ Topology Error Guide
-              </div>
-              <div class="resource-subtitle">
-                Learn about common topology issues
-              </div>
+              <div class="resource-title">🛣️ Topology Error Guide</div>
+              <div class="resource-subtitle">Learn about common topology issues</div>
             </div>
-            <a
-              class="btn btn-primary"
-              target="_blank"
-              rel="noopener"
-              href="https://drive.google.com/file/d/18v2XThEtr9Ea0j7gq6az09nq2GAFl6Ay/view"
-            >
-              Open
-            </a>
+            <a class="btn btn-primary" target="_blank" rel="noopener" href="https://drive.google.com/file/d/18v2XThEtr9Ea0j7gq6az09nq2GAFl6Ay/view">Open</a>
           </div>
         </div>
       </div>
       <div>
         <h3>🧪 Required training tasks</h3>
-        <div class="card" style="margin-top:15px">
+        <div class="card" style="margin-top:14px">
           <ul class="check-list">
-            <li>
-              <strong>34 tasks</strong> — Building Repair
-            </li>
-            <li>
-              <strong>18 tasks</strong> — Landcover
-            </li>
-            <li>
-              <strong>27 tasks</strong> — Transportation
-            </li>
+            <li><strong>34 tasks</strong> — Building Repair</li>
+            <li><strong>18 tasks</strong> — Landcover</li>
+            <li><strong>27 tasks</strong> — Transportation</li>
           </ul>
         </div>
-        <div class="success-box" style="margin-top:15px">
-          <strong>Recommended approach:</strong>
-          <br>
-          Accuracy first. Once you understand the standards and can produce
-          consistent quality, gradually improve your speed.
+        <div class="success-box" style="margin-top:14px">
+          <strong>Recommended approach:</strong><br>
+          Accuracy first. Once you understand the standards and can produce consistent quality, gradually improve your speed.
         </div>
       </div>
     </div>
   </section>
-  <!-- SOFTWARE -->
+
   <section class="container section reveal">
     <div class="section-header">
       <div class="section-label">Required software</div>
-      <h2>
-        Download Ginger
-      </h2>
-      <p>
-        Ginger is used for annotation tasks, corrections, and the quality
-        control workflow.
-      </p>
+      <h2>Download Ginger</h2>
+      <p>Ginger is used for annotation tasks, corrections, and the quality control workflow.</p>
     </div>
     <div class="grid grid-2">
       <div class="card">
@@ -1273,27 +1089,12 @@ footer a:hover {
         <ul class="check-list">
           <li>Windows 11 64-bit</li>
           <li>8GB+ RAM recommended</li>
-           <li>Ryzen 5 4600g/ Intel Core i5-10400</li>
+          <li>Ryzen 5 4600g/ Intel Core i5-10400</li>
           <li>Stable internet connection</li>
         </ul>
-        <div class="hero-actions">
-          <a
-            class="btn btn-primary"
-            target="_blank"
-            rel="noopener"
-            href="https://drive.google.com/file/d/1rCLMWqjyulaYIdLsD8zmwhfPolxzFcPE/view"
-          >
-            Download Ginger
-          </a>
-          <a
-            class="btn"
-            style="background:#e0f2fe;color:#075985"
-            target="_blank"
-            rel="noopener"
-            href="https://drive.google.com/file/d/1eMZvGmU0SwCvntl3RBEOu9h40EAen6j2/view"
-          >
-            How to Extract
-          </a>
+        <div class="hero-actions" style="margin-top:16px">
+          <a class="btn btn-primary" target="_blank" rel="noopener" href="https://drive.google.com/file/d/1rCLMWqjyulaYIdLsD8zmwhfPolxzFcPE/view">Download Ginger</a>
+          <a class="btn" style="background:#e0f2fe;color:#075985" target="_blank" rel="noopener" href="https://drive.google.com/file/d/1eMZvGmU0SwCvntl3RBEOu9h40EAen6j2/view">How to Extract</a>
         </div>
       </div>
       <div class="card">
@@ -1308,94 +1109,64 @@ footer a:hover {
       </div>
     </div>
   </section>
-  <!-- QC WORKFLOW -->
+
   <section class="container section reveal">
     <div class="section-header">
       <div class="section-label">Quality control</div>
-      <h2>
-        How your work is reviewed
-      </h2>
-      <p>
-        Quality control is part of the normal workflow. Feedback helps you
-        understand the standards and improve your work.
-      </p>
+      <h2>How your work is reviewed</h2>
+      <p>Quality control is part of the normal workflow. Feedback helps you understand the standards and improve your work.</p>
     </div>
     <div class="grid grid-4">
       <div class="step">
         <div class="step-number">1</div>
         <h3>Labeling</h3>
-        <p>
-          Complete the assigned annotation task.
-        </p>
+        <p>Complete the assigned annotation task.</p>
       </div>
       <div class="step">
         <div class="step-number">2</div>
         <h3>Checking</h3>
-        <p>
-          A checker reviews your work for quality and accuracy.
-        </p>
+        <p>A checker reviews your work for quality and accuracy.</p>
       </div>
       <div class="step">
         <div class="step-number">3</div>
         <h3>Judging</h3>
-        <p>
-          More complex cases may receive additional review.
-        </p>
+        <p>More complex cases may receive additional review.</p>
       </div>
       <div class="step">
         <div class="step-number">4</div>
         <h3>Reviewing</h3>
-        <p>
-          The task completes the review workflow.
-        </p>
+        <p>The task completes the review workflow.</p>
       </div>
     </div>
-    <div class="warning-box" style="margin-top:20px">
+    <div class="warning-box" style="margin-top:18px">
       <strong>Pushback is part of learning.</strong>
-      When work is returned for correction, carefully read the feedback and
-      use it to avoid repeating the same mistake.
+      When work is returned for correction, carefully read the feedback and use it to avoid repeating the same mistake.
     </div>
   </section>
-  <!-- EARNINGS -->
+
   <section id="earnings" class="container section reveal">
     <div class="section-header">
       <div class="section-label">Payment information</div>
-      <h2>
-        How earnings work
-      </h2>
-      <p>
-        Rates and benchmarks may vary depending on the project, task type,
-        speed, quality, and current project rules.
-      </p>
+      <h2>How earnings work</h2>
+      <p>Rates and benchmarks may vary depending on the project, task type, speed, quality, and current project rules.</p>
     </div>
     <div class="earnings-highlight">
       <div class="earning-box">
-        <div class="earning-value">
-          ₱75/hour
-        </div>
-        <div class="earning-label">
-          Standard rate example
-        </div>
+        <div class="earning-value">₱75/hour</div>
+        <div class="earning-label">Standard rate example</div>
       </div>
       <div class="earning-box">
-        <div class="earning-value">
-          ₱145/hour
-        </div>
-        <div class="earning-label">
-          Example rate for some project benchmarks
-        </div>
+        <div class="earning-value">₱145/hour</div>
+        <div class="earning-label">Example rate for some project benchmarks</div>
       </div>
     </div>
-    <div class="info-box" style="margin-top:20px">
+    <div class="info-box" style="margin-top:18px">
       <strong>Important:</strong>
-      These are examples based on the information provided for the current
-      project. Actual rates, benchmarks, and payment rules may change.
+      These are examples based on the information provided for the current project. Actual rates, benchmarks, and payment rules may change.
     </div>
-    <div style="margin-top:20px">
+    <div style="margin-top:18px">
       <details>
-        <summary>
-          View detailed Building Repair benchmark
-        </summary>
+        <summary>View detailed Building Repair benchmark</summary>
         <div class="details-content">
           <div class="table-wrap">
             <table>
@@ -1408,33 +1179,16 @@ footer a:hover {
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td>Building Repair</td>
-                  <td>—</td>
-                  <td>800</td>
-                  <td>₱75/hour</td>
-                </tr>
-                <tr>
-                  <td>Filter</td>
-                  <td>240</td>
-                  <td>—</td>
-                  <td>₱75/hour</td>
-                </tr>
-                <tr>
-                  <td>3D Matching</td>
-                  <td>—</td>
-                  <td>60</td>
-                  <td>₱75/hour</td>
-                </tr>
+                <tr><td>Building Repair</td><td>—</td><td>800</td><td>₱75/hour</td></tr>
+                <tr><td>Filter</td><td>240</td><td>—</td><td>₱75/hour</td></tr>
+                <tr><td>3D Matching</td><td>—</td><td>60</td><td>₱75/hour</td></tr>
               </tbody>
             </table>
           </div>
         </div>
       </details>
       <details>
-        <summary>
-          View detailed Landcover benchmark
-        </summary>
+        <summary>View detailed Landcover benchmark</summary>
         <div class="details-content">
           <div class="table-wrap">
             <table>
@@ -1447,42 +1201,12 @@ footer a:hover {
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td>1–5</td>
-                  <td>60 seconds</td>
-                  <td>160 bldgs/hr</td>
-                  <td>₱145/hour</td>
-                </tr>
-                <tr>
-                  <td>6–10</td>
-                  <td>90 seconds</td>
-                  <td>290 bldgs/hr</td>
-                  <td>₱145/hour</td>
-                </tr>
-                <tr>
-                  <td>11–50</td>
-                  <td>180 seconds</td>
-                  <td>300 bldgs/hr</td>
-                  <td>₱145/hour</td>
-                </tr>
-                <tr>
-                  <td>51–100</td>
-                  <td>600 seconds</td>
-                  <td>400 bldgs/hr</td>
-                  <td>₱145/hour</td>
-                </tr>
-                <tr>
-                  <td>101–300</td>
-                  <td>1200 seconds</td>
-                  <td>600 bldgs/hr</td>
-                  <td>₱145/hour</td>
-                </tr>
-                <tr>
-                  <td>300+</td>
-                  <td>1200 seconds</td>
-                  <td>1000 bldgs/hr</td>
-                  <td>₱145/hour</td>
-                </tr>
+                <tr><td>1–5</td><td>60 seconds</td><td>160 bldgs/hr</td><td>₱145/hour</td></tr>
+                <tr><td>6–10</td><td>90 seconds</td><td>290 bldgs/hr</td><td>₱145/hour</td></tr>
+                <tr><td>11–50</td><td>180 seconds</td><td>300 bldgs/hr</td><td>₱145/hour</td></tr>
+                <tr><td>51–100</td><td>600 seconds</td><td>400 bldgs/hr</td><td>₱145/hour</td></tr>
+                <tr><td>101–300</td><td>1200 seconds</td><td>600 bldgs/hr</td><td>₱145/hour</td></tr>
+                <tr><td>300+</td><td>1200 seconds</td><td>1000 bldgs/hr</td><td>₱145/hour</td></tr>
               </tbody>
             </table>
           </div>
@@ -1490,304 +1214,183 @@ footer a:hover {
       </details>
     </div>
   </section>
-  <!-- APPLY -->
+
   <section id="apply" class="container section apply-section reveal">
     <div class="section-header">
-      <div class="section-label" style="color:#67e8f9">
-        Ready to begin?
-      </div>
-      <h2>
-        Apply in 2 simple steps
-      </h2>
-      <p>
-        Message the recruiter first, then complete the registration sheet.
-      </p>
+      <div class="section-label" style="color:#7dd3fc">Ready to begin?</div>
+      <h2>Apply in 2 simple steps</h2>
+      <p>Message the recruiter first, then complete the registration sheet.</p>
     </div>
     <div class="grid grid-2">
       <div class="apply-step">
-        <h3>
-          ① Message the recruiter
-        </h3>
-        <p>
-          Send a message so you can receive assistance and onboarding
-          information.
-        </p>
-        <a
-          class="apply-link"
-          target="_blank"
-          rel="noopener"
-          href="https://www.facebook.com/profile.php?id=61590782337797"
-        >
-          <span>
-            💬 Message on Facebook
-          </span>
-          <span>
-            →
-          </span>
+        <h3>① Message the recruiter</h3>
+        <p>Send a message so you can receive assistance and onboarding information.</p>
+        <a class="apply-link" target="_blank" rel="noopener" href="https://www.facebook.com/profile.php?id=61590782337797">
+          <span>💬 Message on Facebook</span>
+          <span>→</span>
         </a>
       </div>
       <div class="apply-step">
-        <h3>
-          ② Complete the registration sheet
-        </h3>
-        <p>
-          Fill out your details using the recruiter name shown below.
-        </p>
+        <h3>② Complete the registration sheet</h3>
+        <p>Fill out your details using the recruiter name shown below.</p>
         <div class="recruiter">
-          <div class="recruiter-label">
-            Recruiter Name
-          </div>
-          <div class="recruiter-name">
-            RENZ IVAN OCANG
-          </div>
+          <div class="recruiter-label">Recruiter Name</div>
+          <div class="recruiter-name">RENZ IVAN OCANG</div>
         </div>
-        <a
-          class="apply-link"
-          target="_blank"
-          rel="noopener"
-          href="https://docs.google.com/forms/d/e/1FAIpQLSc2xQi1S7YSev62kxnBg99AV3CBfcuaZv68YD1IGGiGkUIThA/viewform"
-        >
-          <span>
-            🧾 Open Registration Sheet
-          </span>
-          <span>
-            →
-          </span>
+        <a class="apply-link" target="_blank" rel="noopener" href="https://docs.google.com/forms/d/e/1FAIpQLSc2xQi1S7YSev62kxnBg99AV3CBfcuaZv68YD1IGGiGkUIThA/viewform">
+          <span>🧾 Open Registration Sheet</span>
+          <span>→</span>
         </a>
       </div>
     </div>
-    <div class="warning-box" style="margin-top:20px">
+    <div class="warning-box" style="margin-top:18px">
       <strong>Safety reminder:</strong>
-      Never share your password, OTP, banking password, or other highly
-      sensitive security information with anyone.
+      Never share your password, OTP, banking password, or other highly sensitive security information with anyone.
     </div>
   </section>
-  <!-- PROMOTION -->
+
   <section class="container section reveal">
     <div class="section-header">
       <div class="section-label">Growth opportunity</div>
-      <h2>
-        Improve your skills and grow
-      </h2>
-      <p>
-        Consistent quality, reliability, communication, and accountability
-        can create opportunities for higher-level responsibilities.
-      </p>
+      <h2>Improve your skills and grow</h2>
+      <p>Consistent quality, reliability, communication, and accountability can create opportunities for higher-level responsibilities.</p>
     </div>
     <div class="grid grid-3">
       <div class="card">
         <div class="card-icon">📈</div>
         <h3>Improve accuracy</h3>
-        <p>
-          Learn from feedback and reduce repeated mistakes.
-        </p>
+        <p>Learn from feedback and reduce repeated mistakes.</p>
       </div>
       <div class="card">
         <div class="card-icon">🧠</div>
         <h3>Build experience</h3>
-        <p>
-          Understand project standards and become more confident with the
-          tools.
-        </p>
+        <p>Understand project standards and become more confident with the tools.</p>
       </div>
       <div class="card">
         <div class="card-icon">🏅</div>
         <h3>Take on more responsibility</h3>
-        <p>
-          Strong performers may become eligible for additional quality
-          responsibilities depending on project needs.
-        </p>
+        <p>Strong performers may become eligible for additional quality responsibilities depending on project needs.</p>
       </div>
     </div>
   </section>
-  <!-- FAQ -->
+
   <section id="faq" class="container section reveal">
     <div class="section-header">
       <div class="section-label">Frequently asked questions</div>
-      <h2>
-        Common questions
-      </h2>
-      <p>
-        Here are answers to the questions new applicants commonly have.
-      </p>
+      <h2>Common questions</h2>
+      <p>Here are answers to the questions new applicants commonly have.</p>
     </div>
     <div class="faq">
       <details>
-        <summary>
-          Do I need previous experience?
-        </summary>
+        <summary>Do I need previous experience?</summary>
         <div class="details-content">
-          Training materials and exams are provided for the mapping workflow.
-          You still need to learn the project rules and complete the required
-          training tasks.
+          Training materials and exams are provided for the mapping workflow. You still need to learn the project rules and complete the required training tasks.
         </div>
       </details>
       <details>
-        <summary>
-          Is this work from home?
-        </summary>
+        <summary>Is this work from home?</summary>
         <div class="details-content">
-          The work is performed using a computer and the required software.
-          Follow the current project instructions for the exact working
-          arrangement and requirements.
+          The work is performed using a computer and the required software. Follow the current project instructions for the exact working arrangement and requirements.
         </div>
       </details>
       <details>
-        <summary>
-          How much can I earn?
-        </summary>
+        <summary>How much can I earn?</summary>
         <div class="details-content">
-          Earnings depend on the project, rate structure, benchmark,
-          performance, speed, quality, and current project rules. The rates
-          shown on this website are examples and should not be treated as a
-          guaranteed income.
+          Earnings depend on the project, rate structure, benchmark, performance, speed, quality, and current project rules. The rates shown on this website are examples and should not be treated as a guaranteed income.
         </div>
       </details>
       <details>
-        <summary>
-          What happens after I apply?
-        </summary>
+        <summary>What happens after I apply?</summary>
         <div class="details-content">
-          You should message the recruiter, complete the registration process,
-          receive the appropriate guidance, complete training, and work
-          through the required exams before production.
+          You should message the recruiter, complete the registration process, receive the appropriate guidance, complete training, and work through the required exams before production.
         </div>
       </details>
       <details>
-        <summary>
-          What is a pushback?
-        </summary>
+        <summary>What is a pushback?</summary>
         <div class="details-content">
-          A pushback means work has been returned for correction or additional
-          review. Use the feedback to understand the issue and improve future
-          submissions.
+          A pushback means work has been returned for correction or additional review. Use the feedback to understand the issue and improve future submissions.
         </div>
       </details>
       <details>
-        <summary>
-          What should I never share?
-        </summary>
+        <summary>What should I never share?</summary>
         <div class="details-content">
-          Never share your passwords, OTPs, banking passwords, or other
-          sensitive security credentials.
+          Never share your passwords, OTPs, banking passwords, or other sensitive security credentials.
         </div>
       </details>
     </div>
   </section>
-  <!-- TRUST -->
+
   <section class="container section reveal">
     <div class="section-header">
       <div class="section-label">Before you apply</div>
-      <h2>
-        Important information
-      </h2>
+      <h2>Important information</h2>
     </div>
     <div class="grid grid-2">
       <div class="card trust-card">
-        <h3>
-          📌 Verify instructions
-        </h3>
-        <p>
-          Project requirements, rates, training processes, and task
-          instructions can change. Always follow the latest official
-          instructions provided to you.
-        </p>
+        <h3>📌 Verify instructions</h3>
+        <p>Project requirements, rates, training processes, and task instructions can change. Always follow the latest official instructions provided to you.</p>
       </div>
       <div class="card trust-card">
-        <h3>
-          🔐 Protect your account
-        </h3>
-        <p>
-          Keep your passwords and one-time codes private. Legitimate
-          assistance should not require you to reveal sensitive security
-          credentials.
-        </p>
+        <h3>🔐 Protect your account</h3>
+        <p>Keep your passwords and one-time codes private. Legitimate assistance should not require you to reveal sensitive security credentials.</p>
       </div>
     </div>
   </section>
 </main>
-<!-- STICKY APPLY BUTTON -->
-<a href="#apply" class="sticky-apply">
-  🚀 Apply Now
-</a>
+
+<a href="#apply" class="sticky-apply">🚀 Apply Now</a>
+
 <footer>
   <div class="container">
     <div class="footer-grid">
       <div>
         <h3>🗺️ RGC Map Labeler</h3>
-        <p>
-          A guide for applicants interested in map labeling and data
-          annotation work.
-        </p>
+        <p>A guide for applicants interested in map labeling and data annotation work.</p>
       </div>
       <div>
         <h3>Quick Links</h3>
         <ul>
-          <li>
-            <a href="#start">Start Here</a>
-          </li>
-          <li>
-            <a href="#requirements">Requirements</a>
-          </li>
-          <li>
-            <a href="#training">Training</a>
-          </li>
-          <li>
-            <a href="#apply">Apply Now</a>
-          </li>
+          <li><a href="#start">Start Here</a></li>
+          <li><a href="#requirements">Requirements</a></li>
+          <li><a href="#training">Training</a></li>
+          <li><a href="#apply">Apply Now</a></li>
         </ul>
       </div>
       <div>
         <h3>Resources</h3>
         <ul>
-          <li>
-            <a href="#earnings">Earnings</a>
-          </li>
-          <li>
-            <a href="#faq">FAQ</a>
-          </li>
-          <li>
-            <a href="#requirements">Computer Requirements</a>
-          </li>
+          <li><a href="#earnings">Earnings</a></li>
+          <li><a href="#faq">FAQ</a></li>
+          <li><a href="#requirements">Computer Requirements</a></li>
         </ul>
       </div>
     </div>
     <div class="footer-bottom">
-      Information on this website may change depending on current project
-      requirements and instructions. Always follow the latest instructions
-      provided by the appropriate project team.
+      Information on this website may change depending on current project requirements and instructions. Always follow the latest instructions provided by the appropriate project team.
     </div>
   </div>
 </footer>
+
 <script>
 const mobileToggle = document.getElementById("mobileToggle");
 const navLinks = document.getElementById("navLinks");
 mobileToggle.addEventListener("click", () => {
   const isOpen = navLinks.classList.toggle("open");
-  mobileToggle.setAttribute(
-    "aria-expanded",
-    isOpen ? "true" : "false"
-  );
+  mobileToggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
 });
 document.querySelectorAll(".nav-links a").forEach(link => {
   link.addEventListener("click", () => {
     navLinks.classList.remove("open");
-    mobileToggle.setAttribute(
-      "aria-expanded",
-      "false"
-    );
+    mobileToggle.setAttribute("aria-expanded", "false");
   });
 });
 
-/* Scroll reveal */
 const reveals = document.querySelectorAll(".reveal");
 const observer = new IntersectionObserver((entries) => {
   entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add("visible");
-    }
+    if (entry.isIntersecting) entry.target.classList.add("visible");
   });
-}, { threshold: 0.12, rootMargin: "0px 0px -40px 0px" });
+}, { threshold: 0.1, rootMargin: "0px 0px -30px 0px" });
 reveals.forEach(el => observer.observe(el));
 </script>
 </body>
